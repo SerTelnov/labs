@@ -46,8 +46,11 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-#Java compiled files
+# Java compiled files
 *.class
-#IDEA files
+# IDEA files
 *.xml
 *.iml
+# input/output files
+*.in
+*.out
