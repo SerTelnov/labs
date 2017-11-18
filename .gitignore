@@ -48,9 +48,13 @@ Temporary Items
 
 # Java compiled files
 *.class
+
 # IDEA files
 *.xml
 *.iml
-# input/output files
-*.in
+
+# output files
 *.out
+
+#something private
+cpp-implementation/
