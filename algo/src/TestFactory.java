@@ -1,3 +1,5 @@
+import javafx.util.Pair;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -29,25 +31,31 @@ public class TestFactory {
             return random.nextBoolean();
         }
 
-        public HashSet<Integer>[] getRandomTree() {
+        /*
+            return edges of tree, size every vertex 0..n - 1
+            if there is edge (v -> u), there isn't edge(u -> v)
+         */
+        public HashSet<Pair<Integer, Integer>> getRandomTree() {
             final int n = N;
-            List<Integer> vertexes = new ArrayList<>(n);
-            List<Integer> indexes = new ArrayList<>(n);
-            for (int i = 0; i != n; i++) {
-                vertexes.add(i);
-                indexes.add(i);
+            List<Integer>[] tree = new List[n];
+            for (int i = 0; i < n; i++)
+                tree[i] = new ArrayList<>();
+            int[] p = new int[n];
+            for (int i = 0, j; i < n; j = random.nextInt(i + 1), p[i] = p[j], p[j] = i, i++) ; // random permutation
+            for (int i = 1; i < n; i++) {
+                int parent = p[random.nextInt(i)];
+                tree[parent].add(p[i]);
+                tree[p[i]].add(parent);
             }
-            shuffle(vertexes);
-            shuffle(indexes);
-            HashSet<Integer>[] edges = new HashSet[n];
-            for (int i = 0; i != n; i++) {
-                edges[i] = new HashSet<>();
+            HashSet<Pair<Integer, Integer>> randomEdges = new HashSet<>(n);
+            for (int i = 0; i != tree.length; i++) {
+                for (int j: tree[i]) {
+                    if (!randomEdges.contains(new Pair(j, i))) {
+                        randomEdges.add(new Pair(i, j));
+                    }
+                }
             }
-            for (int i = 1; i != n; i++) {
-                edges[vertexes.get(indexes.get(i - 1))].add(vertexes.get(indexes.get(i)));
-                edges[vertexes.get(indexes.get(i))].add(vertexes.get(indexes.get(i - 1)));
-            }
-            return edges;
+            return randomEdges;
         }
 
         private final int N;
@@ -163,16 +171,17 @@ public class TestFactory {
     private static class ProblemFTestCreator {
 
         private class ProblemFSolver {
-            public ProblemFSolver(HashSet<Integer>[] edges) {
-                final int n = edges.length;
+            public ProblemFSolver(HashSet<Pair<Integer, Integer>> edges) {
+                final int n = edges.size() + 1;
                 this.tree = new Vertex[n];
                 for (int i = 0; i != n; i++) {
                     tree[i] = new Vertex(i);
                 }
-                for (int i = 0; i != edges.length; i++) {
-                    for (Integer curr: edges[i]) {
-                        tree[i].addChild(tree[curr]);
-                    }
+                for (Pair edge: edges) {
+                    int u = (int) edge.getKey();
+                    int v = (int) edge.getValue();
+                    tree[u].addChild(tree[v]);
+                    tree[v].addChild(tree[u]);
                 }
                 this.used = new boolean[n];
             }
@@ -181,15 +190,16 @@ public class TestFactory {
                 tree[v].changeColor();
             }
 
-            public int getDist(final int v) {
+            public long getDist(final int v) {
                 Arrays.fill(used, false);
                 return dfs(tree[v], 0, tree[v].color);
             }
 
             private boolean[] used;
-            private int dfs(Vertex curr, int dist, final boolean color) {
+
+            private long dfs(Vertex curr, int dist, final boolean color) {
                 used[curr.name] = true;
-                int currResult = 0;
+                long currResult = 0;
                 if (curr.color == color) {
                     currResult += dist;
                 }
@@ -225,11 +235,11 @@ public class TestFactory {
             }
         }
 
-        private void printTree(HashSet<Integer>[] edges) {
-            for (int i = 0; i != edges.length; i++) {
-                for (Integer curr: edges[i]) {
-                    input.println((i + 1) + " " + (curr + 1));
-                }
+        private void printTree(HashSet<Pair<Integer, Integer>> edges) {
+            for (Pair edge: edges) {
+                int u = (int) edge.getKey();
+                int v = (int) edge.getValue();
+                input.println((u + 1) + " " + (v + 1));
             }
         }
 
@@ -242,7 +252,7 @@ public class TestFactory {
                     m = scanner.nextInt();
             RandomTest random = new RandomTest(n);
             input.println(n + " " + m);
-            HashSet<Integer>[] randomTree = random.getRandomTree();
+            HashSet<Pair<Integer, Integer>> randomTree = random.getRandomTree();
             printTree(randomTree);
             ProblemFSolver solver = new ProblemFSolver(randomTree);
             for (int i = 0; i != m; i++) {
