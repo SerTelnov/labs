@@ -53,8 +53,9 @@ Temporary Items
 *.xml
 *.iml
 
-# output files
+# text files
 *.out
+*.in
+*.txt
 
 #something private
-cpp-implementation/
