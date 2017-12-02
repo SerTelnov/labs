@@ -52,6 +52,7 @@ Temporary Items
 # IDEA files
 *.xml
 *.iml
+out/
 
 # text files
 *.out
