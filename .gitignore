@@ -53,6 +53,7 @@ Temporary Items
 *.xml
 *.iml
 out/
+*.jar
 
 # text files
 *.out
