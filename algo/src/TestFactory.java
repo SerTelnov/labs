@@ -1,8 +1,12 @@
 import javafx.util.Pair;
 
+import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static java.util.Collections.shuffle;
@@ -273,7 +277,26 @@ public class TestFactory {
         private PrintWriter input;
     }
 
+    public static void write() throws IOException {
+        BufferedWriter writer = Files.newBufferedWriter(Paths.get("input.txt"));
+
+        writer.write(String.format("%d %d\n", 100, 100));
+        for (int i = 0; i != 100; i++) {
+            for (int j = 0; j != 100; j++) {
+                writer.write('.');
+            }
+            writer.write("\n");
+        }
+
+        for (int i = 0; i != 100; i++) {
+            writer.write(10000);
+            writer.write(" ");
+        }
+        writer.close();
+    }
+
     public static void main(String[] args) throws IOException {
-        new ProblemFTestCreator().createTest();
+        write();
+//        new ProblemFTestCreator().createTest();
     }
 }
