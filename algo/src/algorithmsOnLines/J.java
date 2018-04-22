@@ -52,20 +52,6 @@ public class J {
             }
         }
 
-            /*
-    Kacau O(n)
-
-        for i in 0..n - 1
-            rp[p[i]] = i;
-        x = 0;
-        for i in rp
-            x = max(x - 1, 0)
-            while (s[p[i] + x] == s[[p[i - 1] + x])
-                x++
-
-            lcp[i] = x;
-     */
-
         public void solve() {
             lcp = new int[length];
             int[] rp = new int[length];
