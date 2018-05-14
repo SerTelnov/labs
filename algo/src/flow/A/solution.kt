@@ -10,8 +10,8 @@ import java.util.*
 data class Edge(val from: Int, val to: Int, val value: Int)
 
 fun main(args: Array<String>) {
-    val reader = FastReader("C:\\pro\\homework\\labs\\algo\\src\\flow\\A\\flow.entry")
-//    val reader = FastReader("flow.entry")
+    // val reader = FastReader("C:\\pro\\homework\\labs\\algo\\src\\flow\\A\\flow.in")
+   val reader = FastReader("flow.in")
     val n = reader.nextInt()
     val m = reader.nextInt()
 
@@ -75,7 +75,7 @@ fun main(args: Array<String>) {
             curr = prev
         }
     }
-    val writer = FastWriter("flow.exit")
+    val writer = FastWriter("flow.out")
 
     val flow = (0 until n)
             .filter { network[0][it] > 0 }
