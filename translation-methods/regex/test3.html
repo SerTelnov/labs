@@ -1,0 +1,365 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Perl 101 - Regexes</title>
+        <link rel="stylesheet"
+            type="text/css"
+            media="screen"
+            href="theme/styles.css" />
+        <link rel="stylesheet"
+            type="text/css"
+            media="print"
+            href="theme/print.css" />
+        <link rel="stylesheet"
+            type="text/css"
+            media="handheld"
+            href="theme/handheld.css" />
+          <link href="theme/prettify.css" type="text/css" rel="stylesheet" />
+        <script type="text/javascript" src="/js/iepnghack.js"></script>
+        <script type="text/javascript" src="/js/jemplate.js"></script>
+        <script type="text/javascript" src="/js/jmpls.js"></script>
+        <script type="text/javascript" src="/js/prettify.js"></script>
+        <script type="text/javascript">
+            function send_mail() {
+                var subject           = document.getElementById('subject').value;
+                var realname          = document.getElementById('realname').value;
+                var email             = document.getElementById('email').value;
+                var text              = document.getElementById('text').value;
+                var return_link_url   = document.getElementById('return_link_url').value;
+                var return_link_title = document.getElementById('return_link_title').value;
+
+                if ( email == "" ) {
+                    alert('Name is mandatory');
+                    return false;
+                }
+
+                if ( realname == "" ) {
+                    alert('Name is mandatory');
+                    return false;
+                }
+
+                if ( text == "" ) {
+                    alert('Text is mandatory');
+                    return false;
+                }
+
+                var href = '/cgi-bin/formmail.pl?subject=' + subject         +
+                                   '&realname='            + realname        +
+                                   '&email='               + email           +
+                                   '&text='                + text            +
+                                   '&return_link_url='     + return_link_url +
+                                   '&return_link_title='   + return_link_title;
+
+                var res  = Jemplate.process(
+                    'show.tt',
+                    href,
+                    '#feedback_form'
+                );
+            }
+        </script>
+    </head>
+    <body onload="prettyPrint()">
+        <div id="container">
+            <!-- Start container -->
+            <div id="pageHeader">
+                <!-- Start page header -->
+                <a href="/"><img src="images/perl101-header.png" height="51" width="564"
+                    alt="Perl 101: Things Every Perl Programmer Should Know." border="0" /></a>
+            </div><!-- End page header -->
+            <div id="sidebarContainer">
+                <!-- Start Sidebar wrapper -->
+
+                <div class="sideHeader">
+                    Topics
+                </div><!-- Sidebar header -->
+                <div id="sidebar">
+                    <!-- Start sidebar content --><!--- This is the sidebar -->
+<ul>    <li><a href="index.html">Index</a></li>    <li><a href="how-to-get-perl.html">How to get Perl</a></li>    <li><a href="terms.html">Terms</a></li>    <li><a href="documentation.html">Documentation</a></li>    <li><a href="strings.html">Strings</a></li>    <li><a href="numbers.html">Numbers</a></li>    <li><a href="arrays.html">Arrays</a></li>    <li><a href="hashes.html">Hashes</a></li>    <li><a href="regexes.html">Regexes</a></li>    <li><a href="flow-control.html">Flow Control</a></li>    <li><a href="files.html">Files</a></li>    <li><a href="subroutines.html">Subroutines</a></li>    <li><a href="pod.html">POD</a></li>    <li><a href="debugging.html">Debugging</a></li>    <li><a href="modules.html">Modules</a></li>    <li><a href="modules-making-your-own.html">Modules: Making your own</a></li>    <li><a href="external-programs.html">External programs</a></li>    <li><a href="cpan.html">CPAN</a></li>    <li><a href="constructs.html">Constructs</a></li>    <li><a href="references.html">References</a></li>    <li><a href="objects.html">Objects</a></li>    <li><a href="special-variables.html">Special Variables</a></li>    <li><a href="command-line-switches.html">Command-line Switches</a></li>    <li><a href="advanced-functions.html">Advanced Functions</a></li>    <li><a href="style.html">Style</a></li>    <li><a href="performance.html">Performance</a></li>    <li><a href="traps.html">Traps</a></li>    <li><a href="email.html">Email</a></li>    <li><a href="how-do-i.html">How do I...?</a></li>    <li><a href="developer-tools.html">Developer Tools</a></li>    <li><a href="websites.html">Websites</a></li>    <li><a href="publications.html">Publications</a></li>    <li><a href="community.html">Community</a></li>    <li><a href="random.html">Random</a></li>    <li><a href="todo.html">TODO</a></li></ul>                </div><!-- End sidebar content -->
+            </div><!-- End sidebar wrapper -->
+            <div id="contentContainer">
+                <!-- Start main content wrapper -->
+                <div id="content">
+                    <!-- Start content -->
+<h1><a class='u'
+name="Regular_Expressions"
+>Regular Expressions</a></h1>
+
+<p>Regular expressions are too huge of a topic to introduce here,
+but make sure that you understand these concepts.
+For tutorials,
+see <a href="http://perldoc.perl.org/perlrequick.html" class="podlinkurl"
+>perlrequick</a> or <a href="http://perldoc.perl.org/perlretut.html" class="podlinkurl"
+>perlretut</a>.
+For the definitive documentation,
+see <a href="http://perldoc.perl.org/perlre.html" class="podlinkurl"
+>perlre</a>.</p>
+
+<h2><a class='u'
+name="Matches_and_replacements_return_a_quantity."
+>Matches and replacements return a quantity.</a></h2>
+
+<p>The <code>m//</code> and <code>s///</code> operators return the number of matches or replacements they made,
+respectively.
+You can either use the number directly,
+or check it for truth.</p>
+
+<pre class="prettyprint lang-perl">
+    if ( $str =~ /Diggle|Shelley/ ) {
+        print &#34;We found Pete or Steve!\n&#34;;
+    }
+
+    if ( my $n = ($str =~ s/this/that/g) ) {
+        print qq{Replaced $n occurrence(s) of &#34;this&#34;\n};
+    }</pre>
+
+<h2><a class='u'
+name="Don&#39;t_use_capture_variables_without_checking_that_the_match_succeeded."
+>Don&#39;t use capture variables without checking that the match succeeded.</a></h2>
+
+<p>The capture variables, <code>$1</code>, etc, are not valid unless the match succeeded, and they&#39;re not cleared, either.</p>
+
+<pre class="prettyprint lang-perl">
+    # BAD: Not checked, but at least it &#34;works&#34;.
+    my $str = &#39;Perl 101 rocks.&#39;;
+    $str =~ /(\d+)/;
+    print &#34;Number: $1&#34;; # Prints &#34;Number: 101&#34;;
+
+    # WORSE: Not checked, and the result is not what you&#39;d expect
+    $str =~ /(Python|Ruby)/;
+    print &#34;Language: $1&#34;; # Prints &#34;Language: 101&#34;;</pre>
+
+<p>Instead, you must check the return value from the match:</p>
+
+<pre class="prettyprint lang-perl">
+    # GOOD: Check the results
+    my $str = &#39;Perl 101 rocks.&#39;;
+    if ( $str =~ /(\d+)/ ) {
+        print &#34;Number: $1&#34;; # Prints &#34;Number: 101&#34;;
+    }
+
+    if ( $str =~ /(Python|Ruby)/ ) {
+        print &#34;Language: $1&#34;; # Never gets here
+    }</pre>
+
+<h2><a class='u'
+name="XXX_m//_in_list_context_gives_a_list_of_matches"
+>XXX m// in list context gives a list of matches</a></h2>
+
+<h2><a class='u'
+name="Common_match_flags"
+>Common match flags</a></h2>
+
+<ul>
+<li><code>/i</code> - case insensitive match</li>
+
+<li><code>/g</code> - match multiple times
+<pre class="prettyprint lang-perl">
+    $var = &#34;match match match&#34;;
+
+    while ($var =~ /match/g) { $a++; }
+    print &#34;$a\n&#34;; # prints 3
+
+    $a = 0;
+    $a++ foreach ($var =~ /match/g);
+    print &#34;$a\n&#34;; # prints 3</pre>
+</li>
+
+<li><code>/m</code> - <code>^</code> and <code>$</code> change meaning
+<ul>
+<li>Ordinarily, <code>^</code> means &#34;start of string&#34; and <code>$</code>, &#34;end of string&#34;</li>
+
+<li><code>/m</code> makes them mean start and end of line, respectively
+<pre class="prettyprint lang-perl">
+    $str = &#34;one\ntwo\nthree&#34;;
+    @a = $str =~ /^\w+/g;  # @a = (&#34;one&#34;);
+    @b = $str =~ /^\w+/gm; # @b = (&#34;one&#34;,&#34;two&#34;,&#34;three&#34;)</pre>
+</li>
+
+<li>Use <code>\A</code> and <code>\z</code> for start and end of string regardless of <code>/m</code></li>
+
+<li><code>\Z</code> is the same as <code>\z</code> except it will ignore a final newline</li>
+</ul>
+</li>
+
+<li><code>/s</code> - <code>.</code> also matches newline
+<pre class="prettyprint lang-perl">
+    $str = &#34;one\ntwo\nthree\n&#34;;
+    $str =~ /^(.{8})/s;
+    print $1; # prints &#34;one\ntwo\n&#34;</pre>
+</li>
+</ul>
+
+<h2><a class='u'
+name="Capture_variables_$1_and_friends"
+>Capture variables <code>$1</code> and friends</a></h2>
+
+<ul>
+<li>Sets of capturing parentheses are stored in numeric variables</li>
+
+<li>Parenthesis are assigned left to right:
+<pre class="prettyprint lang-perl">
+    my $str = &#34;abc&#34;;
+    $str =~ /(((a)(b))(c))/;
+    print &#34;1: $1 2: $2 3: $3 4: $4 5: $5\n&#34;;
+    # prints: 1: abc 2: ab 3: a 4: b 5: c</pre>
+</li>
+
+<li>No upper limit on number of capturing parenthesis and variables</li>
+</ul>
+
+<h2><a class='u'
+name="Avoid_capture_with_?:"
+>Avoid capture with <code>?:</code></a></h2>
+
+<ul>
+<li>If a parenthesis is followed by <code>?:</code>, the group will not be captured</li>
+
+<li>Useful if you don&#39;t want the matches to be saved
+<pre class="prettyprint lang-perl">
+    my $str = &#34;abc&#34;;
+    $str =~ /(?:a(b)c)/;
+    print &#34;$1\n&#34;; # prints &#34;b&#34;</pre>
+</li>
+</ul>
+
+<h2><a class='u'
+name="Allow_easier_reading_with_the_/x_switch"
+>Allow easier reading with the <code>/x</code> switch</a></h2>
+
+<ul>
+<li>If you&#39;re doing something tricky with a regex, comment it.</li>
+
+<li>You can do this with the <code>/x</code> flag.
+<p>This ugly behemoth</p>
+
+<pre class="prettyprint lang-perl">
+    my ($num) = $ARGV[0] =~ m/^\+?((?:(?&#60;!\+)-)?(?:\d*.)?\d+)$/x;</pre>
+
+<p>is more readable with whitespace and comments, as allowed by the <code>/x</code> flag.</p>
+
+<pre class="prettyprint lang-perl">
+    my ($num) =
+        $ARGV[0] =~ m/^ \+?        # An optional plus sign, to be discarded
+                    (              # Capture...
+                    (?:(?&#60;!\+)-)? # a negative sign, if there&#39;s no plus behind it,
+                    (?:\d*.)?     # an optional number, followed by a point if a decimal,
+                    \d+           # then any number of numbers.
+                    )$/x;</pre>
+</li>
+
+<li>Whitespace and comments are stripped unless escaped.</li>
+</ul>
+
+<h2><a class='u'
+name="Automatically_quote_your_regexes_with_\Q_and_\E"
+>Automatically quote your regexes with <code>\Q</code> and <code>\E</code></a></h2>
+
+<ul>
+<li>Automatically escapes regex metacharacters</li>
+
+<li>Won&#39;t escape dollar signs
+<pre class="prettyprint lang-perl">
+    my $num = &#39;3.1415&#39;;
+    print &#34;ok 1\n&#34; if $num =~ /\Q3.14\E/;
+    $num = &#39;3X1415&#39;;
+    print &#34;ok 2\n&#34; if $num =~ /\Q3.14\E/;
+    print &#34;ok 3\n&#34; if $num =~ /3.14/;</pre>
+
+<p>prints</p>
+
+<pre class="prettyprint lang-perl">
+    ok 1
+    ok 3</pre>
+</li>
+</ul>
+
+<h2><a class='u'
+name="Execute_code_with_/e_flag_to_s///"
+>Execute code with <code>/e</code> flag to <code>s///</code></a></h2>
+
+<ul>
+<li>Allows arbitrary code to replace a string in a regular expression
+<pre class="prettyprint lang-perl">
+    my $str = &#34;AbCdE\n&#34;;
+    $str =~ s/(\w)/lc $1/eg;
+    print $str; # prints &#34;abcde&#34;</pre>
+</li>
+
+<li>Use <code>$1</code> and friends if necessary</li>
+</ul>
+
+<h2><a class='u'
+name="Know_when_to_use_study"
+>Know when to use <code>study</code></a></h2>
+
+<p>study is not helpful in the vast majority of cases. All it does is make a table of where the first occurrence of each of 256 bytes is in the string. This means that if you have a 1,000-character string, and you search for lots of strings that begin with a constant character, then the matcher can jump right to it. For example:</p>
+
+<p>&#34;This is a very long [... 900 characters skipped...] string that I have here, ending at position 1000&#34;</p>
+
+<p>Now, if you are matching this against the regex /Icky/, the matcher will try to find the first letter &#34;I&#34; that matches. That may take scanning through the first 900+ characters until you get to it. But what study does is build a table of the 256 possible bytes and where they first appear, so that in this case, the scanner can jump right to that position and start matching.</p>
+
+<h2><a class='u'
+name="Handle_multi-line_regexes"
+>Handle multi-line regexes</a></h2>
+
+<h2><a class='u'
+name="Use_re_=&#62;_debug"
+>Use re =&#62; debug</a></h2>
+
+<pre class="prettyprint lang-perl">
+    -Mre=debug</pre>
+<hr />
+<div id="feedback_form">
+    <h3>We want your feedback</h3>
+    <p>
+    If we can improve perl101.org in any way, please let us know with this form.
+    </p>
+    <form method="#" enctype="application/x-www-form-urlencoded">
+        <input name="subject" id="subject" value="p101: regexes.html" type="hidden" />
+
+        <input name="return_link_url" id="return_link_url" value="http://perl101.org/regexes.html" type="hidden" />
+        <input name="return_link_title" id="return_link_title" value="Return to Perl 101" type="hidden" />
+        <table>
+            <tbody>
+                <tr>
+                    <th align="right">Your name</th>
+                    <td><input name="realname" id="realname" type="text"></td>
+                </tr>
+
+                <tr>
+                    <th align="right">Your email</th>
+                    <td><input name="email" id="email" type="text"></td>
+                </tr>
+                <tr valign="top">
+                    <th align="right">Your comment</th>
+                    <td>
+                        <textarea name="text" id="text" rows="10" cols="50"></textarea>
+                        <br />
+                        <input name=".submit" value="Send" type="submit" onclick="send_mail(); return false;" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+</div>                </div><!-- End content -->
+            </div><!-- End main content wrapper -->
+        </div><!-- End container --><div id="footer">
+    <p>&copy; 2007-2013 Andy Lester</p>
+</div>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-631706-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script');
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 
+        'http://www') + '.google-analytics.com/ga.js';
+    ga.setAttribute('async', 'true');
+    document.documentElement.firstChild.appendChild(ga);
+  })();
+
+</script>    </body>
+</html>
