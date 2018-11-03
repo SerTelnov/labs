@@ -1,3 +1,11 @@
+# Intellij out files
+out/
+.idea/
+lib/
+
+# Visual Studio Code out files 
+.vscode/
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
