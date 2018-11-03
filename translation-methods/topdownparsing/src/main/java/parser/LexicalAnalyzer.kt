@@ -3,7 +3,7 @@ package parser
 import parser.exception.LexicalException
 import parser.exception.ParserException
 
-class LexicalAnalyzer(input: String) {
+class LexicalAnalyzer(private val input: String) {
 
     private val line = "$input$"
     private var index = 0
@@ -27,7 +27,7 @@ class LexicalAnalyzer(input: String) {
             '&' -> Token.AND
             '!' -> Token.NEGATE
             '$' -> Token.END
-            else -> throw LexicalException("invalid token: '$currChar'")
+            else -> throw LexicalException(input, "invalid token: '$currChar'", index - 1)
         }
 
         return currToken
