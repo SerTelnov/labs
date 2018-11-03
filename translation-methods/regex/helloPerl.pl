@@ -10,11 +10,7 @@ print "Your name is '$name'\n";
 use strict;
 use warnings;
 
-my $str = '  This is temp 
-ok?
-ok!
-
-';
+my $str = '  This is temp ok? ok!';
 my $regex = qr/^(\s+)((\s*\S+)*)(\s*)\n$/p;
 my $subst = '\\2';
 
