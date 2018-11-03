@@ -1,5 +1,6 @@
 package parser
 
+import parser.exception.LexicalException
 import parser.exception.ParserException
 
 class LexicalAnalyzer(input: String) {
@@ -9,8 +10,10 @@ class LexicalAnalyzer(input: String) {
     private var currChar: Char = '\u0000'
     private lateinit var currToken: Token
 
-    fun getIndex() = index
+    fun getIndex() = index - 1
     fun getCurrToken() = currToken
+
+    fun hasNext() = index < line.length && line[index] != '$'
 
     fun nextToken(): Token {
         while (nextChar().isWhitespace());
@@ -24,7 +27,7 @@ class LexicalAnalyzer(input: String) {
             '&' -> Token.AND
             '!' -> Token.NEGATE
             '$' -> Token.END
-            else -> throw ParserException("invalid token: '$currChar'")
+            else -> throw LexicalException("invalid token: '$currChar'")
         }
 
         return currToken

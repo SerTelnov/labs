@@ -1,32 +1,5 @@
 package parser
 
-/*
-Grammar:
-    E  -> OE'
-    E' -> orOE'  | epsilon
-    O  -> XO'
-    O' -> xorXO' | epsilon
-    X  -> AX'
-    X' -> andAX' | epsilon
-    A  -> a | (E) | !E
-
-not terminals:
-    E - expression
-    O - or
-    X - xor
-    A - and
-
-terminals:
-'variable'([a-z])
-'&' (and)
-'|' (or)
-'^' (xor)
-'!' (negate)
-'('
-')'
-
- */
-
 enum class Token {
     VARIABLE,
     AND,
@@ -37,3 +10,14 @@ enum class Token {
     CLOSE_BRACKET,
     END
 }
+
+fun Token.isExpression() = this != Token.END
+
+fun Token.isBinOperation() = this == Token.AND || this == Token.OR || this == Token.XOR
+
+fun Token.isOperation() = this.isBinOperation() || this == Token.NEGATE
+
+fun Token.isEnd() = this == Token.END
+
+fun Token.isOpenBracket() = this == Token.OPEN_BRACKET
+fun Token.isCloseBracket() = this == Token.CLOSE_BRACKET

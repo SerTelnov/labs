@@ -1,13 +1,19 @@
 package parser
 
+import org.junit.Test
 import parser.exception.ParserException
 import parser.exception.UnexpectedActionException
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.assertEquals
+
 
 class ParserTest {
 
     private val parser = Parser()
+
+    @Test
+    fun simpleTest() {
+        assertEquals("a", parser.parse("a").toString())
+    }
 
     @Test
     fun orTest() {
@@ -57,17 +63,47 @@ class ParserTest {
     }
 
     @Test(expected = ParserException::class)
-    fun invalidToken() {
-        parser.parse("a@a")
+    fun invalidBracketSequenceTest01() {
+        parser.parse("(a")
     }
 
     @Test(expected = ParserException::class)
-    fun invalidBracketSequenceTest() {
-        parser.parse("((a&a)")
+    fun invalidBracketSequenceTest02() {
+        parser.parse(")a")
+    }
+
+    @Test(expected = ParserException::class)
+    fun invalidBracketSequenceTest03() {
+        parser.parse("((a)")
+    }
+
+    @Test(expected = ParserException::class)
+    fun invalidBracketSequenceTest04() {
+        parser.parse("a)")
     }
 
     @Test(expected = UnexpectedActionException::class)
-    fun invalidExpression() {
+    fun invalidExpression01() {
         parser.parse("aa")
+    }
+
+    @Test(expected = ParserException::class)
+    fun invalidExpression02() {
+        parser.parse("a&")
+    }
+
+    @Test(expected = UnexpectedActionException::class)
+    fun invalidExpression03() {
+        parser.parse("&a")
+    }
+
+    @Test(expected = ParserException::class)
+    fun invalidExpression04() {
+        parser.parse("()")
+    }
+
+    @Test(expected = ParserException::class)
+    fun invalidExpression05() {
+        parser.parse("a&^|")
     }
 }

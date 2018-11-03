@@ -2,6 +2,7 @@ package parser
 
 import parser.exception.ParserException
 import parser.exception.UnexpectedActionException
+import parser.tree.Tree
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.stream.Collectors
@@ -10,6 +11,7 @@ class Parser {
 
     private lateinit var lexer: LexicalAnalyzer
     private lateinit var input: String
+    private var bracketBalance = 0
 
     fun parsePath(path: Path): List<Tree> {
         return Files.lines(path)
@@ -24,8 +26,14 @@ class Parser {
     }
 
     private fun parse(): Tree {
+        bracketBalance = 0
         lexer.nextToken()
-        return expression()
+
+        val tree = expression()
+        if (lexer.hasNext()) {
+            throw ParserException(input, "didn't parse all expression", lexer.getIndex())
+        }
+        return tree
     }
 
     private fun expression(): Tree {
@@ -36,6 +44,7 @@ class Parser {
                 curr.addChild(or())
                 curr.addChild(subExpression())
             }
+
 //            FOLLOW
             Token.CLOSE_BRACKET, Token.END -> {
             }
@@ -54,6 +63,7 @@ class Parser {
                 curr.addChild(or())
                 curr.addChild(subExpression())
             }
+
 //            FOLLOW
             Token.CLOSE_BRACKET, Token.END -> {
             }
@@ -70,6 +80,7 @@ class Parser {
                 curr.addChild(xor())
                 curr.addChild(subOr())
             }
+
 //            FOLLOW
             Token.OR, Token.CLOSE_BRACKET, Token.END -> {
             }
@@ -88,6 +99,7 @@ class Parser {
                 curr.addChild(xor())
                 curr.addChild(subOr())
             }
+
 //            FOLLOW
             Token.OR, Token.CLOSE_BRACKET, Token.END -> {
             }
@@ -104,10 +116,10 @@ class Parser {
                 curr.addChild(and())
                 curr.addChild(subXor())
             }
+
 //            FOLLOW
             Token.XOR, Token.OR, Token.END, Token.CLOSE_BRACKET -> {
             }
-
             else -> throw UnexpectedActionException(lexer.getCurrToken(), curr.name)
         }
 
@@ -123,10 +135,10 @@ class Parser {
                 curr.addChild(and())
                 curr.addChild(subXor())
             }
+
 //            FOLLOW
             Token.XOR, Token.OR, Token.END, Token.CLOSE_BRACKET -> {
             }
-
             else -> throw UnexpectedActionException(lexer.getCurrToken(), curr.name)
         }
         return curr
@@ -149,6 +161,7 @@ class Parser {
                 putTerminal(curr, "!")
                 curr.addChild(expression())
             }
+
 //            FOLLOW
             Token.XOR, Token.OR, Token.AND, Token.END -> {
             }
@@ -159,23 +172,31 @@ class Parser {
 
     private fun putTerminal(parent: Tree, terminal: String) {
         parent.addChild(Tree(terminal))
-        lexer.nextToken()
+
+        val prev = lexer.getCurrToken()
+        val curr = lexer.nextToken()
+
+        if (prev.isOpenBracket()) {
+            bracketBalance++
+        } else if (curr.isCloseBracket()) {
+            if (bracketBalance == 0) {
+                throw ParserException(input, "incorrect bracket sequence", lexer.getIndex())
+            }
+            bracketBalance--
+        }
+
+        if ((lexer.hasNext() || prev.isBinOperation()) && curr.isEnd()) {
+            throw ParserException(input, "missed expression", lexer.getIndex())
+        } else if (prev.isBinOperation() && curr.isBinOperation()) {
+            throw ParserException(input, "unexpected token: '$curr'", lexer.getIndex())
+        } else if (prev.isOpenBracket() && curr.isCloseBracket()) {
+            throw ParserException(input, "missed expression in brackets", lexer.getIndex() - 1)
+        }
     }
 
     private fun test(token: Token): Boolean {
         if (token != lexer.getCurrToken()) {
-            val message = buildString {
-                append('\n')
-                val info = "expected: ')' in string: "
-                append(info)
-                append(input)
-                append('\n')
-                for (i in 0 until info.length + lexer.getIndex() - 1) {
-                    append('~')
-                }
-                append('^')
-            }
-            throw ParserException(message)
+            throw ParserException(input, "expected: ')'", lexer.getIndex())
         }
         return true
     }
