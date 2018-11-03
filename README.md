@@ -1,10 +1,10 @@
 # University laboratory works
 
-Second course
+Second year
 --
   * [Algorithms](algo)
   * [Discrete Math](da)
   
-Third course
+Third year
 --
   * [Translation methods](translation-methods)
