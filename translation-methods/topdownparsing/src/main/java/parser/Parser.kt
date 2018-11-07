@@ -11,7 +11,6 @@ class Parser {
 
     private lateinit var lexer: LexicalAnalyzer
     private lateinit var input: String
-    private var bracketBalance = 0
 
     fun parsePath(path: Path): List<Tree> {
         return Files.lines(path)
@@ -26,7 +25,6 @@ class Parser {
     }
 
     private fun parse(): Tree {
-        bracketBalance = 0
         lexer.nextToken()
 
         val tree = expression()
@@ -46,7 +44,7 @@ class Parser {
             }
 
 //            FOLLOW
-            Token.CLOSE_BRACKET, Token.END -> {
+            Token.END -> {
             }
             else -> throw UnexpectedActionException(lexer.getCurrToken(), curr.name)
         }
@@ -82,7 +80,7 @@ class Parser {
             }
 
 //            FOLLOW
-            Token.OR, Token.CLOSE_BRACKET, Token.END -> {
+            Token.OR, Token.END -> {
             }
             else -> throw UnexpectedActionException(lexer.getCurrToken(), curr.name)
         }
@@ -118,11 +116,10 @@ class Parser {
             }
 
 //            FOLLOW
-            Token.XOR, Token.OR, Token.END, Token.CLOSE_BRACKET -> {
+            Token.XOR, Token.OR, Token.END -> {
             }
             else -> throw UnexpectedActionException(lexer.getCurrToken(), curr.name)
         }
-
         return curr
     }
 
@@ -144,8 +141,50 @@ class Parser {
         return curr
     }
 
+
     private fun and(): Tree {
         val curr = Tree("A")
+        when (lexer.getCurrToken()) {
+//            FIRST
+            Token.VARIABLE, Token.OPEN_BRACKET, Token.NEGATE -> {
+                curr.addChild(shift())
+                curr.addChild(subAnd())
+            }
+
+//            FOLLOW
+            Token.AND, Token.XOR, Token.OR, Token.END -> {
+            }
+            else -> throw UnexpectedActionException(lexer.getCurrToken(), curr.name)
+        }
+        return curr
+    }
+
+
+    private fun subAnd(): Tree {
+        val curr = Tree("A'")
+        when (lexer.getCurrToken()) {
+//            FIRST
+            Token.LEFT_SHIFT -> {
+                putTerminal(curr, "<<")
+                curr.addChild(shift())
+                curr.addChild(subAnd())
+            }
+            Token.RIGHT_SHIFT -> {
+                putTerminal(curr, ">>")
+                curr.addChild(shift())
+                curr.addChild(subAnd())
+            }
+
+//            FOLLOW
+            Token.AND, Token.XOR, Token.OR, Token.END, Token.CLOSE_BRACKET -> {
+            }
+            else -> throw UnexpectedActionException(lexer.getCurrToken(), curr.name)
+        }
+        return curr
+    }
+
+    private fun shift(): Tree {
+        val curr = Tree("S")
         when (lexer.getCurrToken()) {
 //            FIRST
             Token.VARIABLE -> putTerminal(curr, "a")
@@ -175,15 +214,6 @@ class Parser {
 
         val prev = lexer.getCurrToken()
         val curr = lexer.nextToken()
-
-        if (prev.isOpenBracket()) {
-            bracketBalance++
-        } else if (curr.isCloseBracket()) {
-            if (bracketBalance == 0) {
-                throw ParserException(input, "incorrect bracket sequence", lexer.getIndex())
-            }
-            bracketBalance--
-        }
 
         if ((lexer.hasNext() || prev.isBinOperation()) && curr.isEnd()) {
             throw ParserException(input, "missed expression", lexer.getIndex())

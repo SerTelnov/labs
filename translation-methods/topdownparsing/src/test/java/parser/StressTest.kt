@@ -9,7 +9,7 @@ class StressTest {
 
     @Test
     fun test() {
-        for (id in 0..9) {
+        for (id in 1..10) {
             val path = Paths.get("src/test/java/parser/tests/test$id.txt")
             val list = Files.readAllLines(path)
 

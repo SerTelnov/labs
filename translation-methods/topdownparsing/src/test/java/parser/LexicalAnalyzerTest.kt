@@ -26,6 +26,22 @@ class LexicalAnalyzerTest {
         }
     }
 
+    @Test()
+    fun shiftTest() {
+        val input = "a>>b<<c"
+        val tokens = arrayOf(Token.VARIABLE,
+                Token.RIGHT_SHIFT,
+                Token.VARIABLE,
+                Token.LEFT_SHIFT,
+                Token.VARIABLE)
+        val lexicalAnalyzer = LexicalAnalyzer(input)
+
+        for (i in 0 until tokens.size) {
+            assertEquals(tokens[i], lexicalAnalyzer.nextToken())
+            assertEquals(tokens[i], lexicalAnalyzer.getCurrToken())
+        }
+    }
+
     @Test(expected = LexicalException::class)
     fun invalidOperation() {
         val input = "a@a"

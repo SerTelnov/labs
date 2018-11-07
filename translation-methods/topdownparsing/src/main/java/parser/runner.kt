@@ -5,7 +5,7 @@ import java.util.*
 private fun execute(input: String) {
     val parser = Parser()
     val tree = parser.parse(input)
-    println("Parsed exception: '$tree'")
+    println("Parsed expression: '$tree'")
     tree.toTree()
 }
 

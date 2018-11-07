@@ -5,7 +5,6 @@ import parser.exception.ParserException
 import parser.exception.UnexpectedActionException
 import kotlin.test.assertEquals
 
-
 class ParserTest {
 
     private val parser = Parser()
@@ -40,8 +39,33 @@ class ParserTest {
     }
 
     @Test
+    fun leftShiftTest() {
+        val input = "a>>a"
+        val tree = parser.parse(input)
+
+        assertEquals(input, tree.toString())
+    }
+
+    @Test
+    fun rightShiftTest() {
+        val input = "a<<a"
+        val tree = parser.parse(input)
+
+        assertEquals(input, tree.toString())
+    }
+
+    @Test
     fun inputTest() {
         val input = " (!a | b) & a & (a | !(b ^ c))"
+        val tree = parser.parse(input)
+
+        assertEquals(input.replace(" ", "")
+                .replace("[a-z]".toRegex(), "a"), tree.toString())
+    }
+
+    @Test
+    fun inputShiftTest() {
+        val input = " ((!a | b) & a & (a | !(b ^ c)) >> f) << e"
         val tree = parser.parse(input)
 
         assertEquals(input.replace(" ", "")
@@ -60,6 +84,18 @@ class ParserTest {
         val input = "a         \n  \t\r          &     \n        a"
         val tree = parser.parse(input)
         assertEquals("a&a", tree.toString())
+    }
+
+    @Test
+    fun emptyInputTest() {
+        assertEquals("", parser.parse("\t\n\r ").toString())
+    }
+
+    @Test
+    fun multipleNegate() {
+        val input = "!!!!!!a"
+        val tree = parser.parse(input)
+        assertEquals(input, tree.toString())
     }
 
     @Test(expected = ParserException::class)
@@ -105,5 +141,37 @@ class ParserTest {
     @Test(expected = ParserException::class)
     fun invalidExpression05() {
         parser.parse("a&^|")
+    }
+
+    @Test(expected = ParserException::class)
+    fun invalidShiftTest01() {
+        val input = "a>>>a"
+        val tree = parser.parse(input)
+
+        assertEquals(input, tree.toString())
+    }
+
+    @Test(expected = ParserException::class)
+    fun invalidShiftTest02() {
+        val input = "a>a"
+        val tree = parser.parse(input)
+
+        assertEquals(input, tree.toString())
+    }
+
+    @Test(expected = ParserException::class)
+    fun invalidShiftTest03() {
+        val input = "a<a"
+        val tree = parser.parse(input)
+
+        assertEquals(input, tree.toString())
+    }
+
+    @Test(expected = ParserException::class)
+    fun invalidShiftTest04() {
+        val input = "a< <a"
+        val tree = parser.parse(input)
+
+        assertEquals(input, tree.toString())
     }
 }

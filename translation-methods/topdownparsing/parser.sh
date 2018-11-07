@@ -6,7 +6,6 @@ exec_file="parser.RunnerKt"
 
 if [[ -f ${file} ]]
 then
-    echo "print expression"
     kotlin -cp ${class_path} ${exec_file}
     read -p ""
 else

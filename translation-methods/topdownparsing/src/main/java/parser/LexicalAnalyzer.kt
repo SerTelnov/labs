@@ -12,22 +12,29 @@ class LexicalAnalyzer(private val input: String) {
 
     fun getIndex() = index - 1
     fun getCurrToken() = currToken
-
-    fun hasNext() = index < line.length && line[index] != '$'
+    fun hasNext() = index < line.length && line[index] != '$' || currToken.isExpression()
 
     fun nextToken(): Token {
         while (nextChar().isWhitespace());
 
-        currToken = when (currChar) {
-            in ('a'..'z') -> Token.VARIABLE
-            '(' -> Token.OPEN_BRACKET
-            ')' -> Token.CLOSE_BRACKET
-            '|' -> Token.OR
-            '^' -> Token.XOR
-            '&' -> Token.AND
-            '!' -> Token.NEGATE
-            '$' -> Token.END
-            else -> throw LexicalException(input, "invalid token: '$currChar'", index - 1)
+        currToken = when {
+            currChar in ('a'..'z') -> Token.VARIABLE
+            currChar == '(' -> Token.OPEN_BRACKET
+            currChar == ')' -> Token.CLOSE_BRACKET
+            currChar == '|' -> Token.OR
+            currChar == '^' -> Token.XOR
+            currChar == '&' -> Token.AND
+            currChar == '!' -> Token.NEGATE
+            currChar == '$' -> Token.END
+            line.startsWith(">>", getIndex()) -> {
+                index++
+                Token.RIGHT_SHIFT
+            }
+            line.startsWith("<<", getIndex()) -> {
+                index++
+                Token.LEFT_SHIFT
+            }
+            else -> throw LexicalException(input, "invalid token: '$currChar'", getIndex())
         }
 
         return currToken
