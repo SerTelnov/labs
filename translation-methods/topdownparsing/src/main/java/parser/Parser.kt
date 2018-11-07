@@ -5,6 +5,7 @@ import parser.exception.UnexpectedActionException
 import parser.tree.Tree
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.function.Supplier
 import java.util.stream.Collectors
 
 class Parser {
@@ -34,35 +35,18 @@ class Parser {
         return tree
     }
 
-    private fun expression(): Tree {
-        val curr = Tree("E")
-        when (lexer.getCurrToken()) {
-//            FIRST
-            Token.VARIABLE, Token.OPEN_BRACKET, Token.NEGATE -> {
-                curr.addChild(or())
-                curr.addChild(subExpression())
-            }
-
-//            FOLLOW
-            Token.END -> {
-            }
-            else -> throw UnexpectedActionException(lexer.getCurrToken(), curr.name)
-        }
-        return curr
-    }
+    private fun expression() = notTerminal("E", arrayOf(Token.END),
+            arrayOf(Supplier { or() }, Supplier { subExpression() }))
 
     private fun subExpression(): Tree {
         val curr = Tree("E'")
         when (lexer.getCurrToken()) {
-//            FIRST
             Token.OR -> {
-                curr.addChild(Tree("|"))
-                lexer.nextToken()
+                putTerminal(curr, "|")
                 curr.addChild(or())
                 curr.addChild(subExpression())
             }
 
-//            FOLLOW
             Token.CLOSE_BRACKET, Token.END -> {
             }
             else -> throw UnexpectedActionException(lexer.getCurrToken(), curr.name)
@@ -70,35 +54,18 @@ class Parser {
         return curr
     }
 
-    private fun or(): Tree {
-        val curr = Tree("O")
-        when (lexer.getCurrToken()) {
-//            FIRST
-            Token.VARIABLE, Token.OPEN_BRACKET, Token.NEGATE -> {
-                curr.addChild(xor())
-                curr.addChild(subOr())
-            }
-
-//            FOLLOW
-            Token.OR, Token.END -> {
-            }
-            else -> throw UnexpectedActionException(lexer.getCurrToken(), curr.name)
-        }
-
-        return curr
-    }
+    private fun or() = notTerminal("O", arrayOf(Token.END, Token.OR),
+            arrayOf(Supplier { xor() }, Supplier { subOr() }))
 
     private fun subOr(): Tree {
         val curr = Tree("O'")
         when (lexer.getCurrToken()) {
-//            FIRST
             Token.XOR -> {
                 putTerminal(curr, "^")
                 curr.addChild(xor())
                 curr.addChild(subOr())
             }
 
-//            FOLLOW
             Token.OR, Token.CLOSE_BRACKET, Token.END -> {
             }
             else -> throw UnexpectedActionException(lexer.getCurrToken(), curr.name)
@@ -106,77 +73,42 @@ class Parser {
         return curr
     }
 
-    private fun xor(): Tree {
-        val curr = Tree("X")
-        when (lexer.getCurrToken()) {
-//            FIRST
-            Token.VARIABLE, Token.OPEN_BRACKET, Token.NEGATE -> {
-                curr.addChild(and())
-                curr.addChild(subXor())
-            }
-
-//            FOLLOW
-            Token.XOR, Token.OR, Token.END -> {
-            }
-            else -> throw UnexpectedActionException(lexer.getCurrToken(), curr.name)
-        }
-        return curr
-    }
+    private fun xor() = notTerminal("X", arrayOf(Token.XOR, Token.OR, Token.END),
+            arrayOf(Supplier { and() }, Supplier { subXor() }))
 
     private fun subXor(): Tree {
         val curr = Tree("X'")
         when (lexer.getCurrToken()) {
-//            FIRST
             Token.AND -> {
                 putTerminal(curr, "&")
                 curr.addChild(and())
                 curr.addChild(subXor())
             }
 
-//            FOLLOW
-            Token.XOR, Token.OR, Token.END, Token.CLOSE_BRACKET -> {
+            Token.XOR, Token.OR, Token.CLOSE_BRACKET, Token.END -> {
             }
             else -> throw UnexpectedActionException(lexer.getCurrToken(), curr.name)
         }
         return curr
     }
 
-
     private fun and(): Tree {
-        val curr = Tree("A")
-        when (lexer.getCurrToken()) {
-//            FIRST
-            Token.VARIABLE, Token.OPEN_BRACKET, Token.NEGATE -> {
-                curr.addChild(shift())
-                curr.addChild(subAnd())
-            }
-
-//            FOLLOW
-            Token.AND, Token.XOR, Token.OR, Token.END -> {
-            }
-            else -> throw UnexpectedActionException(lexer.getCurrToken(), curr.name)
-        }
-        return curr
+        return notTerminal("A",
+                arrayOf(Token.AND, Token.XOR, Token.OR, Token.END),
+                arrayOf(Supplier { shift() }, Supplier { subAnd() }))
     }
 
 
     private fun subAnd(): Tree {
         val curr = Tree("A'")
         when (lexer.getCurrToken()) {
-//            FIRST
-            Token.LEFT_SHIFT -> {
-                putTerminal(curr, "<<")
-                curr.addChild(shift())
-                curr.addChild(subAnd())
-            }
-            Token.RIGHT_SHIFT -> {
-                putTerminal(curr, ">>")
+            Token.LEFT_SHIFT, Token.RIGHT_SHIFT -> {
+                putTerminal(curr, lexer.getCurrToken().toString())
                 curr.addChild(shift())
                 curr.addChild(subAnd())
             }
 
-//            FOLLOW
-            Token.AND, Token.XOR, Token.OR, Token.END, Token.CLOSE_BRACKET -> {
+            Token.AND, Token.XOR, Token.OR, Token.CLOSE_BRACKET, Token.END -> {
             }
             else -> throw UnexpectedActionException(lexer.getCurrToken(), curr.name)
         }
@@ -186,26 +118,38 @@ class Parser {
     private fun shift(): Tree {
         val curr = Tree("S")
         when (lexer.getCurrToken()) {
-//            FIRST
             Token.VARIABLE -> putTerminal(curr, "a")
             Token.OPEN_BRACKET -> {
                 putTerminal(curr, "(")
                 curr.addChild(expression())
 
-                if (test(Token.CLOSE_BRACKET)) {
-                    putTerminal(curr, ")")
-                }
+                test(Token.CLOSE_BRACKET)
+                putTerminal(curr, ")")
             }
             Token.NEGATE -> {
                 putTerminal(curr, "!")
                 curr.addChild(expression())
             }
 
-//            FOLLOW
             Token.XOR, Token.OR, Token.AND, Token.END -> {
             }
             else -> throw UnexpectedActionException(lexer.getCurrToken(), curr.name)
         }
+        return curr
+    }
+
+    private fun notTerminal(name: String, follow: Array<Token>,
+                            nextNotTerminals: Array<Supplier<Tree>>): Tree {
+        val curr = Tree(name)
+        val currToken = lexer.getCurrToken()
+        if (currToken in arrayOf(Token.VARIABLE, Token.OPEN_BRACKET, Token.NEGATE)) {
+            for (f in nextNotTerminals) {
+                curr.addChild(f.get())
+            }
+        } else if (currToken !in follow) {
+            throw UnexpectedActionException(lexer.getCurrToken(), curr.name)
+        }
+
         return curr
     }
 
@@ -224,10 +168,9 @@ class Parser {
         }
     }
 
-    private fun test(token: Token): Boolean {
+    private fun test(token: Token) {
         if (token != lexer.getCurrToken()) {
-            throw ParserException(input, "expected: ')'", lexer.getIndex())
+            throw ParserException(input, "expected: '$token'", lexer.getIndex())
         }
-        return true
     }
 }
