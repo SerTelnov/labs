@@ -1,5 +1,6 @@
-#Top-down parser
-Top-down parser for logical expression in ```C```
+Top-down parser
+--
+Parser for logical expression in ```C```
 
 Bash command:
 ---
