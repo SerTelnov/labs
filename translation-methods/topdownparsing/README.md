@@ -9,11 +9,11 @@ Bash command:
 
 Grammar:
 ---
-    E -> O|E | O
-    O -> X^O | X
-    X -> A&X | A
-    A -> S<<A | S>>A | S
-    S -> a | (E) | !E
+    E -> E|O  | O
+    O -> O^X  | X
+    X -> X&A  | A
+    A -> A<<S | A>>S | S
+    S -> a    | (E)  | !E
 
 LL1 Grammar:
 ---

@@ -92,12 +92,9 @@ class Parser {
         return curr
     }
 
-    private fun and(): Tree {
-        return notTerminal("A",
+    private fun and() = notTerminal("A",
                 arrayOf(Token.AND, Token.XOR, Token.OR, Token.END),
                 arrayOf(Supplier { shift() }, Supplier { subAnd() }))
-    }
-
 
     private fun subAnd(): Tree {
         val curr = Tree("A'")
@@ -143,8 +140,8 @@ class Parser {
         val curr = Tree(name)
         val currToken = lexer.getCurrToken()
         if (currToken in arrayOf(Token.VARIABLE, Token.OPEN_BRACKET, Token.NEGATE)) {
-            for (f in nextNotTerminals) {
-                curr.addChild(f.get())
+            nextNotTerminals.forEach {
+                curr.addChild(it.get())
             }
         } else if (currToken !in follow) {
             throw UnexpectedActionException(lexer.getCurrToken(), curr.name)
