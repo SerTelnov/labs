@@ -58,7 +58,6 @@ Temporary Items
 *.class
 
 # IDEA files
-*.xml
 *.iml
 out/
 *.jar
@@ -68,4 +67,7 @@ out/
 *.in
 *.txt
 
-#something private
+*/target/*
+
+# something private
+*/ANTLR/*
