@@ -17,15 +17,15 @@ Grammar:
 
 LL1 Grammar:
 ---
-    E  -> OE'
-    E' -> |OE' | ε
-    O  -> XO'
-    O' -> ^XO' | ε
-    X  -> AX'
-    X' -> &AX' | ε
-    A  -> SA'
+    E  ->  OE'
+    E' -> |OE'  | ε
+    O  ->  XO'
+    O' -> ^XO'  | ε
+    X  ->  AX'
+    X' -> &AX'  | ε
+    A  ->  SA'
     A' -> >>SA' | <<SA' | ε  
-    S  -> a | (E) | !E
+    S  -> a     | (E)   | !E
 
 Not Terminals
 ---
