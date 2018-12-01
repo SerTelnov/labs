@@ -2,7 +2,7 @@
 
 Second year
 --
-  * [Algorithms](algo)
+  * [Algorithms and Data structures](algo)
   * [Discrete Math](da)
   
 Third year
