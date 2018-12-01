@@ -1,4 +1,5 @@
 # University laboratory works
+Solutions for ITMO university laboratory works at Computer Technologies department
 
 Second year
 --
