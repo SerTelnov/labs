@@ -7,3 +7,7 @@
 *.dot
 *.png
 *.txt
+
+
+# antlr out files
+*ANTLR/gen/*
