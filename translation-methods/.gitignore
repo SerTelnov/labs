@@ -1,6 +1,7 @@
-*/target/*
-.idea/*
-.vscode/*
+# out files
+target
+.idea
+.vscode
 *.iml
 
 # input/output files
@@ -10,4 +11,5 @@
 
 
 # antlr out files
-*ANTLR/gen/*
+
+# something private

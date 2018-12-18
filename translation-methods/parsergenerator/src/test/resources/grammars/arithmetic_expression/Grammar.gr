@@ -1,0 +1,22 @@
+expr
+    : total expr1
+    ;
+
+expr1
+    : PLUS total expr1
+    |
+    ;
+
+total
+    : mul total1
+    ;
+
+total1
+    : MUL mul total1
+    |
+    ;
+
+mul
+    : VALUE
+    | LPAREN expr RPAREN
+    ;

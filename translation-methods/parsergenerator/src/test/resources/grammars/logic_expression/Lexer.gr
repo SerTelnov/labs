@@ -1,0 +1,7 @@
+LPAREN:     '\\(';
+RPAREN:     '\\)';
+
+OR:         '\\|';
+AND:        '\\&';
+
+VALUE:      [a-z] [A-Za-z0-9]*;

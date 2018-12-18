@@ -1,0 +1,4 @@
+s
+    :  LPAREN s RPAREN s
+    |
+    ;

@@ -17,5 +17,6 @@
     <modules>
         <module>topdownparsing</module>
         <module>ANTLR</module>
+        <module>parsergenerator</module>
     </modules>
 </project>

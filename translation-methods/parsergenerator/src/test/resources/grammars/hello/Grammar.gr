@@ -1,0 +1,3 @@
+start
+    : HELLO COMMA WORLD MARK
+    ;
