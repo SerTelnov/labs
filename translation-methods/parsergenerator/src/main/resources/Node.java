@@ -6,6 +6,9 @@ public class Node {
     private Token token;
     private List<Node> children;
 
+    protected Node() {
+    }
+
     public Node(String notTerminal) {
         this.token = new Token(notTerminal);
         this.children = new ArrayList<>();

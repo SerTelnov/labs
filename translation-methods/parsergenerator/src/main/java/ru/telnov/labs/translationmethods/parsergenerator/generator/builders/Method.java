@@ -14,10 +14,14 @@ public class Method implements JavaToken {
 
 
     public Method(Modifier modifier, String type, String name, Arg... args) {
+        this(modifier, type, name, Arrays.asList(args));
+    }
+
+    public Method(Modifier modifier, String type, String name, List<Arg> args) {
         this.modifier = modifier;
         this.type = type;
         this.name = name;
-        this.args = Arrays.asList(args);
+        this.args = args;
         this.body = new ArrayList<>();
     }
 

@@ -1,12 +1,10 @@
 package ru.telnov.labs.translationmethods.parsergenerator.utils;
 
 import org.jetbrains.annotations.NotNull;
-import ru.telnov.labs.translationmethods.parsergenerator.tokens.LexerToken;
-import ru.telnov.labs.translationmethods.parsergenerator.tokens.NotTerminal;
-import ru.telnov.labs.translationmethods.parsergenerator.tokens.Rule;
-import ru.telnov.labs.translationmethods.parsergenerator.tokens.Terminal;
+import ru.telnov.labs.translationmethods.parsergenerator.tokens.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public final class FirstAndFollow {
 
@@ -32,7 +30,7 @@ public final class FirstAndFollow {
     }
 
     private static Set<Terminal> getFirst(@NotNull Rule rule, Map<String, Set<Terminal>> firstSet) {
-        LexerToken first = rule.first();
+        LexerToken first = rule.firstToken();
 
         if (!first.isTerminal()) {
             return firstSet.get(first.getName());
@@ -55,18 +53,18 @@ public final class FirstAndFollow {
 
     public static Map<String, Set<Terminal>> generateFollow(Map<String, List<Rule>> grammar,
                                                             Map<String, Set<Terminal>> first,
-                                                            NotTerminal startNotTerminal) {
+                                                            String startNotTerminalStr) {
         Map<String, Set<Terminal>> followSet = new HashMap<>();
         grammar.forEach((name, rules) -> followSet.put(name, new HashSet<>()));
 
-        followSet.get(startNotTerminal.getName()).add(Constants.END_LINE_TERMINAL);
+        followSet.get(startNotTerminalStr).add(Constants.END_LINE_TERMINAL);
         boolean[] wasChange = {true};
 
         while (wasChange[0]) {
             wasChange[0] = false;
 
             grammar.forEach((name, rules) -> rules.forEach(rule -> {
-                Iterator<LexerToken> iterator = rule.getRule().iterator();
+                Iterator<LexerToken> iterator = rule.getTokens().iterator();
                 LexerToken next = iterator.next();
 
                 while (next != null) {

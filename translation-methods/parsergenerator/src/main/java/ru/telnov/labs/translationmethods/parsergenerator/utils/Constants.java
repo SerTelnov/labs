@@ -1,10 +1,13 @@
 package ru.telnov.labs.translationmethods.parsergenerator.utils;
 
+import ru.telnov.labs.translationmethods.parsergenerator.generator.builders.Arg;
 import ru.telnov.labs.translationmethods.parsergenerator.tokens.Rule;
 import ru.telnov.labs.translationmethods.parsergenerator.tokens.Terminal;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class Constants {
 
@@ -24,7 +27,7 @@ public final class Constants {
     public static final String EPSILON = "\u03B5";
     public static final Terminal EPSILON_TERMINAL = new Terminal();
     public static final Set<Terminal> EPSILON_SET = Collections.singleton(EPSILON_TERMINAL);
-    public static final Rule EPSILON_RULE = new Rule(new Terminal("EMPTY", EPSILON));
+    public static final Rule EPSILON_RULE = new Rule();
 
 
     public static final String END_LINE = "$";
@@ -33,6 +36,9 @@ public final class Constants {
 
     public static final String GEN_PACKAGE_NAME = "gen_parser";
     public static final String ENUM_TYPE_CLASS = "TypeToken";
-    public static final String TREE_NODE_CLASS = "Node";
+    public static final String TREE_NODE = "Node";
+    public static final String TREE_VALUE_NODE = "ValueNode";
     public static final String LEXER_TOKEN_CLASS = "Token";
+
+    public static final Arg EMPTY_ARG = new Arg("", "");
 }

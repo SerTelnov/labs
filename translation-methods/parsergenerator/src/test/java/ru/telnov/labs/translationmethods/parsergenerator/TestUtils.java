@@ -2,11 +2,17 @@ package ru.telnov.labs.translationmethods.parsergenerator;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.Token;
+import ru.telnov.labs.translationmethods.parsergenerator.generator.out.brackets.Node;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public final class TestUtils {
 

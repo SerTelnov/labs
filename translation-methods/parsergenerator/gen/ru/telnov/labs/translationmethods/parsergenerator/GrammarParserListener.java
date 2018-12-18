@@ -2,6 +2,7 @@
 
     package ru.telnov.labs.translationmethods.parsergenerator;
 
+    import ru.telnov.labs.translationmethods.parsergenerator.generator.builders.Arg;
     import ru.telnov.labs.translationmethods.parsergenerator.tokens.*;
 
     import java.util.Collections;
@@ -34,6 +35,46 @@ public interface GrammarParserListener extends ParseTreeListener {
 	 */
 	void exitNotTerminal(GrammarParser.NotTerminalContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link GrammarParser#args}.
+	 * @param ctx the parse tree
+	 */
+	void enterArgs(GrammarParser.ArgsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GrammarParser#args}.
+	 * @param ctx the parse tree
+	 */
+	void exitArgs(GrammarParser.ArgsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link GrammarParser#arg}.
+	 * @param ctx the parse tree
+	 */
+	void enterArg(GrammarParser.ArgContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GrammarParser#arg}.
+	 * @param ctx the parse tree
+	 */
+	void exitArg(GrammarParser.ArgContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link GrammarParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void enterType(GrammarParser.TypeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GrammarParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void exitType(GrammarParser.TypeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link GrammarParser#name}.
+	 * @param ctx the parse tree
+	 */
+	void enterName(GrammarParser.NameContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GrammarParser#name}.
+	 * @param ctx the parse tree
+	 */
+	void exitName(GrammarParser.NameContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link GrammarParser#initRules}.
 	 * @param ctx the parse tree
 	 */
@@ -43,6 +84,16 @@ public interface GrammarParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitInitRules(GrammarParser.InitRulesContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link GrammarParser#rules}.
+	 * @param ctx the parse tree
+	 */
+	void enterRules(GrammarParser.RulesContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GrammarParser#rules}.
+	 * @param ctx the parse tree
+	 */
+	void exitRules(GrammarParser.RulesContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link GrammarParser#rrule}.
 	 * @param ctx the parse tree

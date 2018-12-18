@@ -3,3 +3,6 @@ WORLD:  'World';
 
 COMMA:  '\\,';
 MARK:   '\\!';
+
+NAME:   [A-Z][a-z]+
+DIGITS: [1-9][0-9]*

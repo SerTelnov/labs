@@ -53,12 +53,17 @@ public class GeneratorTest {
         test("brackets");
     }
 
+    @Test
+    public void helloTest() throws IOException {
+        test("hello");
+    }
+
     private void test(String filename) throws IOException {
         Path path = Paths.get("gen_parser/" + PACKAGE_NAME + filename);
         long numberOfFiles = Files.walk(path)
                 .filter(Files::isRegularFile)
                 .count();
 
-            assertEquals(5, numberOfFiles);
+            assertEquals(6, numberOfFiles);
     }
 }

@@ -1,3 +1,15 @@
-start
-    : HELLO COMMA WORLD MARK
+start returns (String s)
+    : HELLO { s = "Hello, World!"; } COMMA WORLD MARK
+    | WORLD { s = "World"; }
+    | name<"Hello"> { s = nameNode.getValue(); }
+    | value<"Hello", "your value: "> { s = valueNode.getValue(); }
     ;
+
+name(String input) returns (String s)
+    : NAME { s = input + ", <ANY_NAME>"; }
+    ;
+
+value(String s1, String s2) returns (String s)
+    : DIGITS { s = s1 + ", " + s2 + "'<ANY_VALUE>'"; }
+    ;
+

@@ -40,8 +40,9 @@ public final class Generator {
     public void generate(CharStream grammarStream, CharStream lexerStream) {
         List<Terminal> terminals = generateLexer(lexerStream);
         classBuilder.buildEnum(terminals);
-        classBuilder.buildHelperClass(Constants.TREE_NODE_CLASS);
+        classBuilder.buildHelperClass(Constants.TREE_NODE);
         classBuilder.buildHelperClass(Constants.LEXER_TOKEN_CLASS);
+        classBuilder.buildHelperClass(Constants.TREE_VALUE_NODE);
 
         generateParser(grammarStream, terminals);
     }
@@ -69,15 +70,14 @@ public final class Generator {
 
         Map<String, List<Rule>> grammar = FirstAndFollow.removeUselessSymbols(notTerminals);
         Map<String, Set<Terminal>> first = FirstAndFollow.generateFirst(grammar);
-        Map<String, Set<Terminal>> follow = FirstAndFollow.generateFollow(grammar, first, notTerminals.get(0));
+        Map<String, Set<Terminal>> follow = FirstAndFollow.generateFollow(grammar, first, notTerminals.get(0).getName());
 
-        classBuilder.buildClass(ParserGenerator.generateParser(first, follow, notTerminals));
+        classBuilder.buildClass(ParserGenerator.generateParser(first, follow, notTerminals, toMap(notTerminals)));
     }
 
     private void refactorRules(List<NotTerminal> notTerminals, List<Terminal> terminals) {
         Map<String, NotTerminal> notTerminalsMap = toMap(notTerminals);
         Map<String, Terminal> terminalsMap = toMap(terminals);
-
 
         for (NotTerminal notTerminal : notTerminals) {
             for (Rule rule : notTerminal.getRules()) {

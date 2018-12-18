@@ -23,10 +23,10 @@ public class FirstAndFollowTest {
     public void init() {
         grammar = new HashMap<>();
         NotTerminal E = new NotTerminal("E");
-        NotTerminal EE = new NotTerminal("E'");
+        NotTerminal EE = new NotTerminal("EE");
         NotTerminal T = new NotTerminal("T");
-        NotTerminal TT = new NotTerminal("T'");
-        NotTerminal F = new NotTerminal("F", new Rule(new Terminal("VAR", "value")));
+        NotTerminal TT = new NotTerminal("TT");
+        NotTerminal F = new NotTerminal("F");
 
         E.addRule(new Rule(T, EE));
         EE.addRule(new Rule(new Terminal("PLUS", "+"), T, EE));
@@ -36,7 +36,8 @@ public class FirstAndFollowTest {
         TT.addRule(new Rule(new Terminal("MUL", "*"), F, TT));
         TT.addRule(Constants.EPSILON_RULE);
 
-        F.addRule(new Rule(new Terminal("LB", "("), E, new Terminal("RB", ")")));
+        F.addRules(new Rule(new Terminal("VAR", "value")),
+                new Rule(new Terminal("LB", "("), E, new Terminal("RB", ")")));
 
         grammar.put("E", E.getRules());
         grammar.put("EE", EE.getRules());
@@ -51,16 +52,36 @@ public class FirstAndFollowTest {
         Map<String, String> expected = new HashMap<>();
 
         expected.put("E", "{LB, VAR}");
+        expected.put("EE", "{EMPTY, PLUS}");
         expected.put("T", "{LB, VAR}");
-        expected.put("F", "{LB, VAR}");
-        expected.put("EE", "{PLUS, EMPTY}");
         expected.put("TT", "{MUL, EMPTY}");
+        expected.put("F", "{LB, VAR}");
 
         first.forEach((name, value) -> {
             String actual = value.stream()
                     .map(LexerToken::getName)
                     .collect(Collectors.joining(", ", "{", "}"));
             assertEquals(expected.get(name), actual);
+        });
+    }
+
+    @Test
+    public void followTest() {
+        Map<String, Set<Terminal>> first = FirstAndFollow.generateFirst(grammar);
+        Map<String, Set<Terminal>> follow = FirstAndFollow.generateFollow(grammar, first, "E");
+        Map<String, String> expected = new HashMap<>();
+
+        expected.put("E", "{ENDLINE, RB}");
+        expected.put("EE", "{ENDLINE, RB}");
+        expected.put("T", "{ENDLINE, PLUS, RB}");
+        expected.put("TT", "{ENDLINE, PLUS, RB}");
+        expected.put("F", "{MUL, ENDLINE, PLUS, RB}");
+
+        follow.forEach((name, value) -> {
+            String actual = value.stream()
+                    .map(LexerToken::getName)
+                    .collect(Collectors.joining(", ", "{", "}"));
+            assertEquals("Not terminal: " + name, expected.get(name), actual);
         });
     }
 }

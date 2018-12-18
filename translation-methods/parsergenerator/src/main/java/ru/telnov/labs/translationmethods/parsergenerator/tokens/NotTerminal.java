@@ -10,13 +10,7 @@ public class NotTerminal extends AbstractLexerToken {
     private List<Rule> rules;
 
     public NotTerminal(String name) {
-        super(name);
-        this.rules = new ArrayList<>();
-    }
-
-    public NotTerminal(String name, Rule... rules) {
-        super(name);
-        this.rules = new ArrayList<>(Arrays.asList(rules));
+        this(name, new ArrayList<>());
     }
 
     public NotTerminal(String name, List<Rule> rules) {
@@ -24,13 +18,17 @@ public class NotTerminal extends AbstractLexerToken {
         this.rules = rules;
     }
 
-    public void addRule(Rule rule) {
-        rules.add(rule);
+    @Override
+    public TokenType getTokenType() {
+        return TokenType.NOT_TERMINAL;
     }
 
-    @Override
-    public boolean isTerminal() {
-        return false;
+    public void addRule(Rule rule) {
+        this.rules.add(rule);
+    }
+
+    public final void addRules(Rule... rules) {
+        this.rules.addAll(Arrays.asList(rules));
     }
 
     public List<Rule> getRules() {
@@ -47,7 +45,7 @@ public class NotTerminal extends AbstractLexerToken {
 
         if (obj instanceof NotTerminal) {
             NotTerminal other = (NotTerminal) obj;
-            return rules.equals(other.rules);
+            return this.rules.equals(other.rules);
         }
 
         return false;

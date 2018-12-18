@@ -4,12 +4,14 @@ import ru.telnov.labs.translationmethods.parsergenerator.utils.Constants;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Rule {
 
-    private List<LexerToken> rule;
+    protected List<LexerValue> rule;
     private Set<Terminal> terminals;
     private Set<NotTerminal> notTerminals;
+    private List<LexerToken> tokens;
 
     private Set<String> names;
 
@@ -17,29 +19,48 @@ public class Rule {
         this(Collections.singletonList(Constants.EPSILON_TERMINAL));
     }
 
-    public Rule(LexerToken... tokens) {
+    public Rule(LexerValue... tokens) {
         this(Arrays.asList(tokens));
     }
 
-    public Rule(List<LexerToken> tokens) {
+    public Rule(List<LexerValue> tokens) {
         this.rule = Collections.unmodifiableList(tokens);
         this.names = rule.stream()
-                .map(LexerToken::getName)
+                .filter(it -> !it.isCode())
+                .map(it -> ((LexerToken) it).getName())
                 .collect(Collectors.toSet());
     }
 
-
-    public List<LexerToken> getRule() {
+    public List<LexerValue> getRule() {
         return rule;
     }
 
-    public LexerToken first() {
-        return rule.get(0);
+    public List<LexerToken> getTokens() {
+        if (tokens == null) {
+            this.tokens = new ArrayList<>();
+            for (LexerValue value : rule) {
+                if (!value.isCode()) {
+                    tokens.add((LexerToken) value);
+                }
+            }
+        }
+
+        return tokens;
+    }
+
+    public LexerToken firstToken() {
+        for (LexerValue value : rule) {
+            if (!value.isCode()) {
+                return (LexerToken) value;
+            }
+        }
+
+        throw new RuntimeException("");
     }
 
     public Set<Terminal> getTerminals() {
         if (terminals == null) {
-            terminals = rule.stream()
+            terminals = getLexerTokenStream()
                     .filter(LexerToken::isTerminal)
                     .map(it -> (Terminal) it)
                     .collect(Collectors.toSet());
@@ -50,7 +71,7 @@ public class Rule {
 
     public Set<NotTerminal> getNotTerminals() {
         if (notTerminals == null) {
-            notTerminals = rule.stream()
+            notTerminals = getLexerTokenStream()
                     .filter(it -> !it.isTerminal())
                     .map(it -> (NotTerminal) it)
                     .collect(Collectors.toSet());
@@ -68,19 +89,38 @@ public class Rule {
             return;
         }
 
-        List<LexerToken> newRule = new ArrayList<>(rule.size());
+        List<LexerValue> newRule = new ArrayList<>(rule.size());
 
-        for (LexerToken token : rule) {
-            if (token.isTerminal()) {
-                if (!token.equals(Constants.EPSILON_TERMINAL)) {
-                    newRule.add(terminalMap.get(token.getName()));
+        for (LexerValue value : rule) {
+            if (!value.isCode()) {
+                LexerToken token = (LexerToken) value;
+
+                if (token.isTerminal()) {
+                    if (!token.equals(Constants.EPSILON_TERMINAL)) {
+                        newRule.add(terminalMap.get(token.getName()));
+                    }
+                } else {
+                    UnknownToken unknownToken = (UnknownToken) token;
+                    NotTerminal notTerminal = notTerminalMap.get(token.getName());
+
+                    if (notTerminal.getTokenType() == TokenType.ATTRIBUTE_NTERMINAL && unknownToken.hasInValues()) {
+                        ((AttributeNotTerminal) notTerminal).setInValues(unknownToken.getInValue());
+                    }
+
+                    newRule.add(notTerminal);
                 }
             } else {
-                newRule.add(notTerminalMap.get(token.getName()));
+                newRule.add(value);
             }
         }
 
         this.rule = Collections.unmodifiableList(newRule);
+    }
+
+    private Stream<LexerToken> getLexerTokenStream() {
+        return rule.stream()
+                .filter(it -> !it.isCode())
+                .map(it -> (LexerToken) it);
     }
 
     @Override
@@ -93,7 +133,7 @@ public class Rule {
 
         if (obj instanceof Rule) {
             Rule other = (Rule) obj;
-            return rule.equals(other.rule);
+            return this.rule.equals(other.rule);
         }
 
         return false;

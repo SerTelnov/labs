@@ -37,8 +37,8 @@ public class Terminal extends AbstractLexerToken {
     }
 
     @Override
-    public boolean isTerminal() {
-        return true;
+    public TokenType getTokenType() {
+        return TokenType.TERMINAL;
     }
 
     @Override

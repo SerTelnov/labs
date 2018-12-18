@@ -1,13 +1,13 @@
 package ru.telnov.labs.translationmethods.parsergenerator.generator;
 
 import ru.telnov.labs.translationmethods.parsergenerator.generator.builders.*;
-import ru.telnov.labs.translationmethods.parsergenerator.tokens.LexerToken;
-import ru.telnov.labs.translationmethods.parsergenerator.tokens.NotTerminal;
-import ru.telnov.labs.translationmethods.parsergenerator.tokens.Rule;
-import ru.telnov.labs.translationmethods.parsergenerator.tokens.Terminal;
+import ru.telnov.labs.translationmethods.parsergenerator.tokens.*;
 import ru.telnov.labs.translationmethods.parsergenerator.utils.Constants;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ru.telnov.labs.translationmethods.parsergenerator.utils.Constants.TABS;
@@ -22,7 +22,7 @@ public final class ParserGenerator {
     private static final String CONSUME_METHOD = "consume";
     private static final String LIST_TOKENS = "List<" + Constants.LEXER_TOKEN_CLASS + ">";
 
-    private static final String NO_TERM_TYPE = Constants.TREE_NODE_CLASS;
+    private static final String NO_TERM_TYPE = Constants.TREE_NODE;
 
     private ParserGenerator() {
         throw new RuntimeException();
@@ -30,7 +30,8 @@ public final class ParserGenerator {
 
     public static Clazz generateParser(Map<String, Set<Terminal>> first,
                                        Map<String, Set<Terminal>> follow,
-                                       List<NotTerminal> notTerminals) {
+                                       List<NotTerminal> notTerminals,
+                                       Map<String, NotTerminal> grammar) {
         Clazz clazz = new Clazz(FILENAME, new Arg(LIST_TOKENS, "tokens"));
 
         clazz.setImports(IMPORTS);
@@ -40,22 +41,22 @@ public final class ParserGenerator {
         clazz.addMethod(makeStartMethod(notTerminals.get(0).getName()));
 
         notTerminals.forEach(notTerminal ->
-                clazz.addMethod(makeNotTerminalMethod(notTerminal, first, follow)));
+                clazz.addMethod(makeNotTerminalMethod(notTerminal, first, follow, grammar)));
 
         clazz.addMethod(makeConsumeMethod());
         return clazz;
     }
 
     private static Method makeStartMethod(String startNotTerminal) {
-        Method method = new Method(Modifier.PUBLIC, Constants.TREE_NODE_CLASS, "parseStartMethod");
+        Method method = new Method(Modifier.PUBLIC, Constants.TREE_NODE, "parseStartMethod");
         method.addStatements("this.index = 0",
-                Constants.TREE_NODE_CLASS + " root = " + startNotTerminal + "()");
+                Constants.TREE_NODE + " root = " + startNotTerminal + "()");
 
         method.addStatements("if (index != tokens.size() - 1) {",
                 "String leftTokens = tokens.subList(index, tokens.size())\n" +
-                "                    .stream()\n" +
-                "                    .map(t -> t.getValue())\n" +
-                "                    .collect(Collectors.joining(\", \"))",
+                        "                    .stream()\n" +
+                        "                    .map(t -> t.getValue())\n" +
+                        "                    .collect(Collectors.joining(\", \"))",
                 "throw new RuntimeException(\"didn't parse all expression\\nLeft tokens: \" + leftTokens)",
                 "}",
                 "return root");
@@ -70,11 +71,37 @@ public final class ParserGenerator {
 
     private static Method makeNotTerminalMethod(NotTerminal notTerminal,
                                                 Map<String, Set<Terminal>> first,
-                                                Map<String, Set<Terminal>> follow) {
-        Method method = new Method(Modifier.PUBLIC, Constants.TREE_NODE_CLASS, notTerminal.getName());
-        method.addStatement(NO_TERM_TYPE + " curNode = new Node(\"" + notTerminal.getName() + "\")");
-        method.addStatement(Constants.LEXER_TOKEN_CLASS + " curToken = tokens.get(index)");
+                                                Map<String, Set<Terminal>> follow,
+                                                Map<String, NotTerminal> grammar) {
 
+        Method method;
+        String curNodeInit = "%s curNode = new %s(\"" + notTerminal.getName() + "\")";
+        String returnValueName = "";
+
+        if (notTerminal.getTokenType() == TokenType.NOT_TERMINAL) {
+            method = new Method(Modifier.PUBLIC, Constants.TREE_NODE, notTerminal.getName());
+            method.addStatement(String.format(curNodeInit, Constants.TREE_NODE, Constants.TREE_NODE));
+        } else {
+            AttributeNotTerminal anTerminal = (AttributeNotTerminal) notTerminal;
+
+            if (anTerminal.hasInputArg()) {
+                method = new Method(Modifier.PUBLIC, Constants.TREE_NODE, notTerminal.getName(), anTerminal.getInputArgs());
+            } else {
+                method = new Method(Modifier.PUBLIC, Constants.TREE_NODE, notTerminal.getName());
+            }
+
+            String nodeType;
+            if (anTerminal.hasReturnArg()) {
+                nodeType = Constants.TREE_VALUE_NODE + "<" + anTerminal.getReturnType() + ">";
+                returnValueName = anTerminal.getReturnValueName();
+            } else {
+                nodeType = Constants.TREE_NODE;
+            }
+
+            method.addStatement(String.format(curNodeInit, nodeType, nodeType));
+            method.addStatement(anTerminal.getReturnType() + " " + anTerminal.getReturnValueName());
+        }
+        method.addStatement(Constants.LEXER_TOKEN_CLASS + " curToken = tokens.get(index)");
 
 //        first
         StringBuilder switchBuilder = new StringBuilder();
@@ -82,7 +109,7 @@ public final class ParserGenerator {
 
         boolean wasEpsilon = false;
         for (Rule rule : notTerminal.getRules()) {
-            LexerToken firstToken = rule.first();
+            LexerToken firstToken = rule.firstToken();
             Set<Terminal> curFirst;
             if (!firstToken.isTerminal()) {
                 curFirst = first.get(firstToken.getName());
@@ -95,14 +122,57 @@ public final class ParserGenerator {
             switchBuilder.append(makeCaseBlock(curFirst));
             switchBuilder.append(rule.getRule().stream()
                     .filter(token -> !token.equals(Constants.EPSILON_TERMINAL))
-                    .map(token -> {
-                        if (token.isTerminal())
-                            return CONSUME_METHOD;
-                        else
-                            return token.getName();
+                    .map(value -> {
+                        if (value.isCode()) {
+                            JCode code = (JCode) value;
+                            return code.getCode();
+                        } else {
+                            LexerToken token = (LexerToken) value;
+                            String methodName;
+                            StringBuilder builder = new StringBuilder();
+
+                            methodName = token.getName();
+                            if (token.getTokenType() == TokenType.ATTRIBUTE_NTERMINAL) {
+                                AttributeNotTerminal anTerminal = (AttributeNotTerminal) token;
+                                builder.append("ValueNode<")
+                                        .append(anTerminal.getReturnType())
+                                        .append("> ")
+                                        .append(methodName)
+                                        .append("Node = ")
+                                        .append("(ValueNode<String>) ")
+                                        .append(methodName)
+                                        .append("(");
+
+                                NotTerminal nextNotTerm = grammar.get(methodName);
+                                if (nextNotTerm.getTokenType() == TokenType.ATTRIBUTE_NTERMINAL) {
+                                    AttributeNotTerminal anTerm = (AttributeNotTerminal) nextNotTerm;
+                                    if (anTerm.hasInValue()) {
+                                        builder.append(anTerm.getInValues());
+                                    }
+                                }
+
+                                builder
+                                        .append(");")
+                                        .append(TABS[4])
+                                        .append("curNode.addChild(")
+                                        .append(methodName)
+                                        .append("Node")
+                                        .append(");");
+                            } else {
+                                if (token.isTerminal()) {
+                                    methodName = CONSUME_METHOD;
+                                }
+
+                                builder.append("curNode.addChild(")
+                                        .append(methodName)
+                                        .append("());");
+                            }
+                            return builder.toString();
+                        }
                     })
-                    .map(methodName -> TABS[4] + "curNode.addChild(" + methodName + "());\n")
+                    .map(s -> TABS[4] + s + "\n")
                     .collect(Collectors.joining()));
+
             if (sbLen < switchBuilder.length()) {
                 switchBuilder.append(TABS[4]).append("break;\n");
             }
@@ -128,6 +198,9 @@ public final class ParserGenerator {
 
         method.addStatement(switchBuilder.toString());
 
+        if (!returnValueName.isEmpty()) {
+            method.addStatement("curNode.setValue(" + returnValueName + ")");
+        }
         method.addStatements("return curNode");
         return method;
     }
