@@ -1,4 +1,4 @@
-package util
+package util.io.kotlin
 
 import java.io.BufferedReader
 import java.io.FileInputStream
@@ -10,6 +10,7 @@ import java.util.*
  */
 
 class FastReader {
+
     internal var br: BufferedReader
     internal var st: StringTokenizer? = null
 

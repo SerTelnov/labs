@@ -13,6 +13,7 @@
         <module>algo</module>
         <module>da</module>
         <module>translation-methods</module>
+        <module>evolutionary-computing</module>
     </modules>
 
     <properties>

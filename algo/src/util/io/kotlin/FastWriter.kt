@@ -1,6 +1,7 @@
-package util
+package util.io.kotlin
 
 import java.io.BufferedWriter
+import java.io.Closeable
 import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -10,7 +11,7 @@ import java.io.OutputStreamWriter
  * Created by Telnov Sergey on 16.03.2018.
  */
 
-class FastWriter {
+class FastWriter : Closeable {
     private var bw: BufferedWriter
     private val sb: StringBuilder = StringBuilder()
 
@@ -63,7 +64,7 @@ class FastWriter {
         sb.append(d).append(' ')
     }
 
-    fun close() {
+    override fun close() {
         bw.write(sb.toString())
         bw.flush()
         bw.close()

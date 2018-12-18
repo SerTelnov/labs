@@ -62,6 +62,11 @@ Temporary Items
 out/
 *.jar
 
+# eclipse files
+.classpath
+.project
+.settings
+
 # text files
 *.out
 *.in
@@ -70,4 +75,5 @@ out/
 */target/*
 
 # something private
-
+evolutionary-computing
+evolutionarycomputing
