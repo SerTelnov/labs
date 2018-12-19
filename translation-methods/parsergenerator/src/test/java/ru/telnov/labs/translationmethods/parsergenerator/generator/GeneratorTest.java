@@ -31,7 +31,7 @@ public class GeneratorTest {
                         String filePath = "grammars/" + dir + "/";
                         parserGenerator.generate(
                                 utils.getCharStreamFromFile(filePath + "Grammar.gr"),
-                                utils.getCharStreamFromFile(filePath + "Lexer.gr"));
+                                utils.getCharStreamFromFile(filePath + "Tokens.gr"));
                     } catch (IOException e) {
                         System.err.println(e.getMessage());
                     }
@@ -64,6 +64,6 @@ public class GeneratorTest {
                 .filter(Files::isRegularFile)
                 .count();
 
-            assertEquals(6, numberOfFiles);
+        assertEquals(6, numberOfFiles);
     }
 }

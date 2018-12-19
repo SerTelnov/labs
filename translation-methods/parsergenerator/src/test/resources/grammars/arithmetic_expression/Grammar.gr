@@ -1,22 +1,41 @@
-expr
-    : total expr1
+expr returns(Long value)
+    : total
+        { value = totalNode.getValue();     }
+      expr1<value>
+        { Long res = expr1Node.getValue();  }
+        { if (res != null) value = res;     }
     ;
 
-expr1
-    : PLUS total expr1
+expr1(Long valExpr) returns(Long value)
+    : PLUS total
+        { value = valExpr + totalNode.getValue();   }
+     expr1<value>
+        { Long v = expr1Node.getValue();            }
+        { if (v == null) v = 0L;                    }
+        { value += v;                               }
     |
     ;
 
-total
-    : mul total1
+total returns(Long value)
+    : mul
+        { Long mulValue = mulNode.getValue();   }
+      total1<mulValue>
+        { value = total1Node.getValue();        }
+        { if (value == null) value = mulValue;  }
     ;
 
-total1
-    : MUL mul total1
+total1(Long valTot) returns(Long value)
+    : MUL mul
+        { Long mulValue = valTot * mulNode.getValue();  }
+      total1<mulValue>
+        { value = total1Node.getValue();                }
+        { if (value == null) value = mulValue;          }
     |
     ;
 
-mul
+mul returns(Long value)
     : VALUE
+        { value = Long.valueOf(tokens.get(index - 1).getValue());   }
     | LPAREN expr RPAREN
+        { value = exprNode.getValue();                              }
     ;

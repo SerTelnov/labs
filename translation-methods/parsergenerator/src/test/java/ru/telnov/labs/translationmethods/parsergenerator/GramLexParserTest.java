@@ -19,7 +19,7 @@ public class GramLexParserTest {
     @Test
     public void helloTest() throws IOException {
         String[] expected = {"HELLO", "WORLD", "COMMA", "MARK"};
-        test("grammars/hello/Lexer.gr", expected);
+        test("grammars/hello/Tokens.gr", expected);
     }
 
     private void test(String filename, String[] expectedTerminals) throws IOException {

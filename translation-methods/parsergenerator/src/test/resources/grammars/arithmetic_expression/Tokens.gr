@@ -4,4 +4,4 @@ RPAREN:     '\\)';
 PLUS:       '\\+';
 MUL:        '\\*';
 
-VALUE:      [a-z] [A-Za-z0-9]*;
+VALUE:      [1-9][0-9]*;
