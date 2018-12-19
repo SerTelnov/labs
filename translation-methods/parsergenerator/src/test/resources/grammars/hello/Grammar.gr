@@ -6,10 +6,10 @@ start returns (String s)
     ;
 
 name(String input) returns (String s)
-    : NAME { s = input + ", <ANY_NAME>"; }
+    : NAME { s = input + ", " + getLastTerminal(); }
     ;
 
 value(String s1, String s2) returns (String s)
-    : DIGITS { s = s1 + ", " + s2 + "'<ANY_VALUE>'"; }
+    : DIGITS { s = s1 + ", " + s2 + "'" + getLastTerminal() + "'"; }
     ;
 

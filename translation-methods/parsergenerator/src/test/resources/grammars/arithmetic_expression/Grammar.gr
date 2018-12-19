@@ -35,7 +35,7 @@ total1(Long valTot) returns(Long value)
 
 mul returns(Long value)
     : VALUE
-        { value = Long.valueOf(tokens.get(index - 1).getValue());   }
+        { value = Long.valueOf(getLastTerminal());   }
     | LPAREN expr RPAREN
         { value = exprNode.getValue();                              }
     ;

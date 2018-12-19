@@ -44,7 +44,14 @@ public final class ParserGenerator {
                 clazz.addMethod(makeNotTerminalMethod(notTerminal, first, follow, grammar)));
 
         clazz.addMethod(makeConsumeMethod());
+        clazz.addMethod(makeTerminalGetter());
         return clazz;
+    }
+
+    private static Method makeTerminalGetter() {
+        Method method = new Method(Modifier.PUBLIC, "String", "getLastTerminal");
+        method.addStatement("return tokens.get(index - 1).getValue()");
+        return method;
     }
 
     private static Method makeStartMethod(String startNotTerminal) {
