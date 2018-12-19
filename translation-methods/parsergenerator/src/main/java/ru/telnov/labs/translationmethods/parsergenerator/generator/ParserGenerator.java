@@ -99,7 +99,9 @@ public final class ParserGenerator {
             }
 
             method.addStatement(String.format(curNodeInit, nodeType, nodeType));
-            method.addStatement(anTerminal.getReturnType() + " " + anTerminal.getReturnValueName());
+            if (!returnValueName.isEmpty()) {
+                method.addStatement(anTerminal.getReturnType() + " " + returnValueName + " = null");
+            }
         }
         method.addStatement(Constants.LEXER_TOKEN_CLASS + " curToken = tokens.get(index)");
 
@@ -139,7 +141,9 @@ public final class ParserGenerator {
                                         .append("> ")
                                         .append(methodName)
                                         .append("Node = ")
-                                        .append("(ValueNode<String>) ")
+                                        .append("(ValueNode<")
+                                        .append(anTerminal.getReturnType())
+                                        .append(">) ")
                                         .append(methodName)
                                         .append("(");
 

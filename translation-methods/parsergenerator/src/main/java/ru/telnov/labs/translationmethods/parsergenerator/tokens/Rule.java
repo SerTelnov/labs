@@ -24,11 +24,26 @@ public class Rule {
     }
 
     public Rule(List<LexerValue> tokens) {
-        this.rule = Collections.unmodifiableList(tokens);
+        if (allIsCode(tokens)) {
+            List<LexerValue> values = new ArrayList<>();
+            values.add(Constants.EPSILON_TERMINAL);
+            values.addAll(tokens);
+
+            this.rule = Collections.unmodifiableList(values);
+        } else {
+            this.rule = Collections.unmodifiableList(tokens);
+        }
+
         this.names = rule.stream()
                 .filter(it -> !it.isCode())
                 .map(it -> ((LexerToken) it).getName())
                 .collect(Collectors.toSet());
+    }
+
+    private boolean allIsCode(List<LexerValue> values) {
+        return values.stream()
+                .filter(LexerValue::isCode)
+                .count() == values.size();
     }
 
     public List<LexerValue> getRule() {
@@ -98,6 +113,8 @@ public class Rule {
                 if (token.isTerminal()) {
                     if (!token.equals(Constants.EPSILON_TERMINAL)) {
                         newRule.add(terminalMap.get(token.getName()));
+                    } else {
+                        newRule.add(Constants.EPSILON_TERMINAL);
                     }
                 } else {
                     UnknownToken unknownToken = (UnknownToken) token;

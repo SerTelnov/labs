@@ -5,7 +5,21 @@ public class JCode implements LexerValue {
     private final String code;
 
     public JCode(String code) {
-        this.code = code.substring(1, code.length() - 1);
+        this.code = trimString(code);
+    }
+
+    private String trimString(String s) {
+        int left = 1;
+        while (left < s.length() && Character.isWhitespace(s.charAt(left))) {
+            left++;
+        }
+
+        int right = s.length() - 2;
+        while (right > left && Character.isWhitespace(s.charAt(right))) {
+            right--;
+        }
+
+        return s.substring(left, right + 1);
     }
 
     @Override

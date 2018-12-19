@@ -30,15 +30,15 @@ public final class Generator {
         this.classBuilder = new ClassBuilder(packageName);
     }
 
-    public void generate(String grammarFile, String lexerFile) throws IOException {
-        CharStream lexerStream = getFileStream(lexerFile);
+    public void generate(String grammarFile, String tokenFile) throws IOException {
+        CharStream lexerStream = getFileStream(tokenFile);
         CharStream grammarStream = getFileStream(grammarFile);
 
         generate(grammarStream, lexerStream);
     }
 
-    public void generate(CharStream grammarStream, CharStream lexerStream) {
-        List<Terminal> terminals = generateLexer(lexerStream);
+    public void generate(CharStream grammarStream, CharStream tokenStream) {
+        List<Terminal> terminals = generateLexer(tokenStream);
         classBuilder.buildEnum(terminals);
         classBuilder.buildHelperClass(Constants.TREE_NODE);
         classBuilder.buildHelperClass(Constants.LEXER_TOKEN_CLASS);
@@ -47,8 +47,8 @@ public final class Generator {
         generateParser(grammarStream, terminals);
     }
 
-    private List<Terminal> generateLexer(CharStream lexerStream) {
-        GrammarLexer lexer = new GrammarLexer(lexerStream);
+    private List<Terminal> generateLexer(CharStream tokenStream) {
+        GrammarLexer lexer = new GrammarLexer(tokenStream);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
 
         GramLexParser parser = new GramLexParser(tokens);
