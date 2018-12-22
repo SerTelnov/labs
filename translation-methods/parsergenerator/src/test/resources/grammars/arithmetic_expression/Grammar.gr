@@ -1,41 +1,66 @@
-expr returns(Long value)
+expr returns (Integer outVal)
     : total
-        { value = totalNode.getValue();     }
-      expr1<value>
-        { Long res = expr1Node.getValue();  }
-        { if (res != null) value = res;     }
+        { Integer v = totalNode.getValue(); }
+        { outVal = v == null ? 0 : v;       }
+      expr1<outVal>
+        { if (expr1Node.getValue() != null) }
+        {   outVal = expr1Node.getValue();  }
     ;
 
-expr1(Long valExpr) returns(Long value)
-    : PLUS total
-        { value = valExpr + totalNode.getValue();   }
-     expr1<value>
-        { Long v = expr1Node.getValue();            }
-        { if (v == null) v = 0L;                    }
-        { value += v;                               }
+expr1 (Integer inVal) returns (Integer outVal)
+    : opPlusMinus
+        { String op = opPlusMinusNode.getValue();       }
+      total
+        { Integer v = totalNode.getValue();             }
+        { if (op.equals("+")) outVal = inVal + v;       }
+        { else if (op.equals("-")) outVal = inVal - v;  }
+        { else outVal = inVal;                          }
+      expr1<outVal>
+        { if (expr1Node.getValue() != null)             }
+        {   outVal = expr1Node.getValue();              }
     |
     ;
 
-total returns(Long value)
+opPlusMinus returns (String s)
+    : PLUS  { s = "+";  }
+    | MINUS { s = "-";  }
+    ;
+
+total returns (Integer outVal)
     : mul
-        { Long mulValue = mulNode.getValue();   }
-      total1<mulValue>
-        { value = total1Node.getValue();        }
-        { if (value == null) value = mulValue;  }
+        { outVal = mulNode.getValue();          }
+      total1<outVal>
+        { if (total1Node.getValue() != null)    }
+        {   outVal = total1Node.getValue();     }
     ;
 
-total1(Long valTot) returns(Long value)
-    : MUL mul
-        { Long mulValue = valTot * mulNode.getValue();  }
-      total1<mulValue>
-        { value = total1Node.getValue();                }
-        { if (value == null) value = mulValue;          }
+total1 (Integer inVal) returns (Integer outVal)
+    : opMulDiv
+        { String op = opMulDivNode.getValue();          }
+      mul
+        { Integer v = mulNode.getValue();               }
+        { if (op.equals("*")) outVal = inVal * v;       }
+        { else if (op.equals("/")) outVal = inVal / v;  }
+        { else outVal = inVal;                          }
+      total1<outVal>
+        { if (total1Node.getValue() != null)            }
+        {   outVal = total1Node.getValue();             }
     |
     ;
 
-mul returns(Long value)
-    : VALUE
-        { value = Long.valueOf(getLastTerminal());   }
-    | LPAREN expr RPAREN
-        { value = exprNode.getValue();                              }
+opMulDiv returns (String s)
+    : MUL   { s = "*";  }
+    | DIV   { s = "/";  }
+    ;
+
+mul returns (Integer outVal)
+    : LPAREN expr RPAREN
+        { outVal = exprNode.getValue();                 }
+    | VALUE
+        { outVal = Integer.valueOf(getLastTerminal());  }
+    | opPlusMinus
+        { String unOp = opPlusMinusNode.getValue();       }
+      VALUE
+        { String v = getLastTerminal();                 }
+        { outVal = Integer.valueOf(unOp + v);           }
     ;

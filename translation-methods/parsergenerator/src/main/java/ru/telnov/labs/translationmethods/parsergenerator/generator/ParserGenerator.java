@@ -45,6 +45,7 @@ public final class ParserGenerator {
 
         clazz.addMethod(makeConsumeMethod());
         clazz.addMethod(makeTerminalGetter());
+
         return clazz;
     }
 
@@ -163,7 +164,7 @@ public final class ParserGenerator {
                                 }
 
                                 builder
-                                        .append(");")
+                                        .append(");\n")
                                         .append(TABS[4])
                                         .append("curNode.addChild(")
                                         .append(methodName)

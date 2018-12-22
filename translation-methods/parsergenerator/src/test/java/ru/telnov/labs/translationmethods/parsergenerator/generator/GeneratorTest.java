@@ -40,7 +40,7 @@ public class GeneratorTest {
 
     @Test
     public void arithmetic_expressionTest() throws IOException {
-        test("arithmetic_expression");
+        test("plus_mul_expression");
     }
 
     @Test

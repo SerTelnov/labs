@@ -121,7 +121,7 @@ public class Rule {
                     NotTerminal notTerminal = notTerminalMap.get(token.getName());
 
                     if (notTerminal.getTokenType() == TokenType.ATTRIBUTE_NTERMINAL && unknownToken.hasInValues()) {
-                        ((AttributeNotTerminal) notTerminal).setInValues(unknownToken.getInValue());
+                        ((AttributeNotTerminal) notTerminal).setInValue(unknownToken.getInValue());
                     }
 
                     newRule.add(notTerminal);

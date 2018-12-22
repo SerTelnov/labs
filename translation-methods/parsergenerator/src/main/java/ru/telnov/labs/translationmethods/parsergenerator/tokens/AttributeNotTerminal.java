@@ -3,13 +3,16 @@ package ru.telnov.labs.translationmethods.parsergenerator.tokens;
 import ru.telnov.labs.translationmethods.parsergenerator.generator.builders.Arg;
 import ru.telnov.labs.translationmethods.parsergenerator.utils.Constants;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AttributeNotTerminal extends NotTerminal {
 
+    private List<String> inValues;
+    private int indexInValue;
+
     private Arg returnArg = Constants.EMPTY_ARG;
     private List<Arg> inputArgs;
-    private String inValues;
 
 
     public AttributeNotTerminal(String name, Arg arg) {
@@ -53,15 +56,18 @@ public class AttributeNotTerminal extends NotTerminal {
     }
 
     public boolean hasInValue() {
-        return this.inValues != null;
+        return this.inValues != null && indexInValue < inValues.size();
     }
 
-    public void setInValues(String inValues) {
-        this.inValues = inValues;
+    public void setInValue(String inValue) {
+        if (inValues == null) {
+            inValues = new ArrayList<>();
+        }
+        inValues.add(inValue);
     }
 
     public String getInValues() {
-        return inValues;
+        return inValues.get(indexInValue++);
     }
 
     @Override
