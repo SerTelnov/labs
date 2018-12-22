@@ -18,7 +18,7 @@ public class GramLexParserTest {
 
     @Test
     public void helloTest() throws IOException {
-        String[] expected = {"HELLO", "WORLD", "COMMA", "MARK"};
+        String[] expected = {"HELLO", "WORLD", "COMMA", "MARK", "NAME", "DIGITS"};
         test("grammars/hello/Tokens.gr", expected);
     }
 

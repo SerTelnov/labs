@@ -7,10 +7,7 @@ import ru.telnov.labs.translationmethods.parsergenerator.tokens.NotTerminal;
 import ru.telnov.labs.translationmethods.parsergenerator.tokens.Rule;
 import ru.telnov.labs.translationmethods.parsergenerator.tokens.Terminal;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -49,19 +46,19 @@ public class FirstAndFollowTest {
     @Test
     public void firstTest() {
         Map<String, Set<Terminal>> first = FirstAndFollow.generateFirst(grammar);
-        Map<String, String> expected = new HashMap<>();
+        Map<String, Set<String>> expected = new HashMap<>();
 
-        expected.put("E", "{LB, VAR}");
-        expected.put("EE", "{EMPTY, PLUS}");
-        expected.put("T", "{LB, VAR}");
-        expected.put("TT", "{MUL, EMPTY}");
-        expected.put("F", "{LB, VAR}");
+        expected.put("E", makeStringSet("LB", "VAR"));
+        expected.put("EE", makeStringSet("PLUS", "EPSILON"));
+        expected.put("T", makeStringSet("LB", "VAR"));
+        expected.put("TT", makeStringSet("MUL", "EPSILON"));
+        expected.put("F", makeStringSet("LB", "VAR"));
 
+        assertEquals(expected.size(), first.size());
         first.forEach((name, value) -> {
-            String actual = value.stream()
-                    .map(LexerToken::getName)
-                    .collect(Collectors.joining(", ", "{", "}"));
-            assertEquals(expected.get(name), actual);
+            Set<String> expectedSet = expected.get(name);
+            assertEquals(expectedSet.size(), value.size());
+            value.forEach(v -> assertTrue(expectedSet.contains(v.getName())));
         });
     }
 
@@ -69,19 +66,23 @@ public class FirstAndFollowTest {
     public void followTest() {
         Map<String, Set<Terminal>> first = FirstAndFollow.generateFirst(grammar);
         Map<String, Set<Terminal>> follow = FirstAndFollow.generateFollow(grammar, first, "E");
-        Map<String, String> expected = new HashMap<>();
+        Map<String, Set<String>> expected = new HashMap<>();
 
-        expected.put("E", "{ENDLINE, RB}");
-        expected.put("EE", "{ENDLINE, RB}");
-        expected.put("T", "{ENDLINE, PLUS, RB}");
-        expected.put("TT", "{ENDLINE, PLUS, RB}");
-        expected.put("F", "{MUL, ENDLINE, PLUS, RB}");
+        expected.put("E", makeStringSet("ENDLINE", "RB"));
+        expected.put("EE", makeStringSet("ENDLINE", "RB"));
+        expected.put("T", makeStringSet("ENDLINE", "PLUS", "RB"));
+        expected.put("TT", makeStringSet("ENDLINE", "PLUS", "RB"));
+        expected.put("F", makeStringSet("ENDLINE", "PLUS", "RB", "MUL"));
 
+        assertEquals(expected.size(), follow.size());
         follow.forEach((name, value) -> {
-            String actual = value.stream()
-                    .map(LexerToken::getName)
-                    .collect(Collectors.joining(", ", "{", "}"));
-            assertEquals("Not terminal: " + name, expected.get(name), actual);
+            Set<String> expectedSet = expected.get(name);
+            assertEquals(expectedSet.size(), value.size());
+            value.forEach(v -> assertTrue(expectedSet.contains(v.getName())));
         });
+    }
+
+    private static Set<String> makeStringSet(String... strings) {
+        return new HashSet<>(Arrays.asList(strings));
     }
 }

@@ -18,12 +18,12 @@ public class GrammarParserTest {
     public void helloTest() throws Exception {
         List<NotTerminal> grammar = parse("grammars/hello/Grammar.gr");
 
-        assertEquals(1, grammar.size());
+        assertEquals(3, grammar.size());
 
         NotTerminal notTerminal = grammar.get(0);
         assertEquals("start", notTerminal.getName());
-        assertEquals(1, notTerminal.getRules().size());
-        assertEquals(4, notTerminal.getRules().get(0).getRule().size());
+        assertEquals(4, notTerminal.getRules().size());
+        assertEquals(5, notTerminal.getRules().get(0).getRule().size());
     }
 
     @Test
