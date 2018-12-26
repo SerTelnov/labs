@@ -55,29 +55,29 @@ opMulDiv returns (String s)
 
 unOps returns (Integer outVal)
     : opPlusMinus
-        { String unOp = opPlusMinusNode.getValue();             }
+        { String unOp = opPlusMinusNode.getValue(); }
       term
-        { String v = getLastTerminal();                         }
-        { outVal = Integer.valueOf(unOp + v);                   }
+        { String v = getLastTerminal();             }
+        { outVal = Integer.valueOf(unOp + v);       }
     | term
-        { outVal = termNode1.getValue();    }
+        { outVal = termNode1.getValue();            }
       fact<outVal>
-        { Integer factVal = factNode.getValue(); }
-        { if (factVal != null) outVal = factVal; }
+        { Integer factVal = factNode.getValue();    }
+        { if (factVal != null) outVal = factVal;    }
     ;
 
 fact (Integer inVal) returns (Integer outVal)
     : FACTORIAL
-        { outVal = countFactorial(inVal);   }
+        { outVal = countFactorial(inVal);           }
       fact<outVal>
-        { Integer factVal = factNode.getValue(); }
-        { if (factVal != null) outVal = factVal; }
+        { Integer factVal = factNode.getValue();    }
+        { if (factVal != null) outVal = factVal;    }
     |
     ;
 
 term returns (Integer outVal)
     : VALUE
-        { outVal = Integer.valueOf(getLastTerminal());          }
+        { outVal = Integer.valueOf(getLastTerminal());  }
     | LPAREN expr RPAREN
-        { outVal = exprNode.getValue();                         }
+        { outVal = exprNode.getValue();                 }
     ;
