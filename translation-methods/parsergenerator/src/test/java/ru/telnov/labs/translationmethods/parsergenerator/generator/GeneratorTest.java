@@ -1,8 +1,8 @@
 package ru.telnov.labs.translationmethods.parsergenerator.generator;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 import ru.telnov.labs.translationmethods.parsergenerator.TestUtils;
+import ru.telnov.labs.translationmethods.parsergenerator.generator.exception.GeneratorException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,7 +16,7 @@ public class GeneratorTest {
     private static TestUtils utils = new TestUtils();
     private static final String PACKAGE_NAME = "ru/telnov/labs/translationmethods/parsergenerator/generator/out/";
 
-    @BeforeClass
+//    @BeforeClass
     public static void initParser() throws IOException {
         Path path = utils.getPath("grammars");
 
@@ -40,7 +40,7 @@ public class GeneratorTest {
 
     @Test
     public void arithmetic_expressionTest() throws IOException {
-        test("plus_mul_expression");
+        test("arithmetic_expression");
     }
 
     @Test
@@ -65,5 +65,18 @@ public class GeneratorTest {
                 .count();
 
         assertEquals(6, numberOfFiles);
+    }
+
+    @Test(expected = GeneratorException.class)
+    public void invalidGrammar() {
+        String filePath = "invalid_grammars";
+        Generator parserGenerator = new Generator(PACKAGE_NAME + filePath);
+        try {
+            parserGenerator.generate(
+                    utils.getCharStreamFromFile(filePath + "/Grammar.gr"),
+                    utils.getCharStreamFromFile(filePath + "/Tokens.gr"));
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
     }
 }

@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import ru.telnov.labs.translationmethods.parsergenerator.tokens.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public final class FirstAndFollow {
 
@@ -30,13 +29,25 @@ public final class FirstAndFollow {
     }
 
     private static Set<Terminal> getFirst(@NotNull Rule rule, Map<String, Set<Terminal>> firstSet) {
-        LexerToken first = rule.firstToken();
+        List<LexerToken> tokens = rule.getTokens();
+        Set<Terminal> terminals = new HashSet<>();
 
-        if (!first.isTerminal()) {
-            return firstSet.get(first.getName());
-        } else {
-            return Collections.singleton((Terminal) first);
+        boolean wasEpsilon = true;
+        int i = 0;
+
+        while (wasEpsilon && i < tokens.size()) {
+            LexerToken cur = tokens.get(i++);
+            if (!cur.isTerminal()) {
+                Set<Terminal> curFirst = firstSet.get(cur.getName());
+                wasEpsilon = curFirst.contains(Constants.EPSILON_TERMINAL);
+                terminals.addAll(curFirst);
+            } else {
+                wasEpsilon = cur == Constants.EPSILON_TERMINAL;
+                terminals.add((Terminal) cur);
+            }
         }
+
+        return terminals;
     }
 
     private static Set<Terminal> getFirst(Map<String, Set<Terminal>> first, LexerToken token) {
@@ -156,5 +167,45 @@ public final class FirstAndFollow {
             }
         }
         return true;
+    }
+
+    public static boolean isNotLL1Grammar(Map<String, List<Rule>> grammar,
+                                          Map<String, Set<Terminal>> first,
+                                          Map<String, Set<Terminal>> follow) {
+
+        return grammar.entrySet().stream()
+                .anyMatch(entry -> {
+                    String name = entry.getKey();
+                    List<Rule> rules = entry.getValue();
+                    for (int i = 0; i != rules.size(); i++) {
+                        for (int j = 0; j != rules.size(); j++) {
+                            if (i != j) {
+                                Set<Terminal> aFirst = getFirst(rules.get(i), first);
+                                Set<Terminal> bFirst = getFirst(rules.get(j), first);
+
+                                if (containAny(aFirst, bFirst)) {
+                                    return true;
+                                }
+
+                                if (aFirst.contains(Constants.EPSILON_TERMINAL)) {
+                                    if (containAny(follow.get(name), bFirst)) {
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return false;
+                });
+    }
+
+    private static <E> boolean containAny(Set<E> a, Set<E> b) {
+        for (E el : a) {
+            if (b.contains(el)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

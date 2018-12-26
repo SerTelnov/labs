@@ -7,6 +7,7 @@ import ru.telnov.labs.translationmethods.parsergenerator.GramLexParser;
 import ru.telnov.labs.translationmethods.parsergenerator.GrammarLexer;
 import ru.telnov.labs.translationmethods.parsergenerator.GrammarParser;
 import ru.telnov.labs.translationmethods.parsergenerator.generator.builders.ClassBuilder;
+import ru.telnov.labs.translationmethods.parsergenerator.generator.exception.GeneratorException;
 import ru.telnov.labs.translationmethods.parsergenerator.tokens.LexerToken;
 import ru.telnov.labs.translationmethods.parsergenerator.tokens.NotTerminal;
 import ru.telnov.labs.translationmethods.parsergenerator.tokens.Rule;
@@ -39,12 +40,14 @@ public final class Generator {
 
     public void generate(CharStream grammarStream, CharStream tokenStream) {
         List<Terminal> terminals = generateLexer(tokenStream);
+        generateParser(grammarStream, terminals);
+
         classBuilder.buildEnum(terminals);
         classBuilder.buildHelperClass(Constants.TREE_NODE);
         classBuilder.buildHelperClass(Constants.LEXER_TOKEN_CLASS);
         classBuilder.buildHelperClass(Constants.TREE_VALUE_NODE);
 
-        generateParser(grammarStream, terminals);
+        classBuilder.buildClass(LexerGenerator.generateLexer(terminals));
     }
 
     private List<Terminal> generateLexer(CharStream tokenStream) {
@@ -52,11 +55,7 @@ public final class Generator {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
 
         GramLexParser parser = new GramLexParser(tokens);
-        List<Terminal> terminals = parser.parseTokens().trmls;
-
-        classBuilder.buildClass(LexerGenerator.generateLexer(terminals));
-
-        return terminals;
+        return parser.parseTokens().trmls;
     }
 
     private void generateParser(CharStream grammarStream, List<Terminal> terminals) {
@@ -71,6 +70,10 @@ public final class Generator {
         Map<String, List<Rule>> grammar = FirstAndFollow.removeUselessSymbols(notTerminals);
         Map<String, Set<Terminal>> first = FirstAndFollow.generateFirst(grammar);
         Map<String, Set<Terminal>> follow = FirstAndFollow.generateFollow(grammar, first, notTerminals.get(0).getName());
+
+        if (FirstAndFollow.isNotLL1Grammar(grammar, first, follow)) {
+            throw new GeneratorException("grammar isn't LL1");
+        }
 
         classBuilder.buildClass(ParserGenerator.generateParser(first, follow, notTerminals, toMap(notTerminals)));
     }

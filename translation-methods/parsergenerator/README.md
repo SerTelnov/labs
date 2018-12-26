@@ -9,7 +9,7 @@ Parser generator for ``LL1`` grammar.
 
 #### Example of grammars
 Grammar file
-```antlrv4
+```text
 start returns (String s)
     : HELLO { s = "Hello, World!"; } COMMA WORLD MARK
     | WORLD { s = "World"; }
@@ -26,7 +26,7 @@ value(String s1, String s2) returns (String s)
     ;
 ```
 Tokens
-```antlrv4
+```text
 HELLO:  'Hello';
 WORLD:  'World';
 

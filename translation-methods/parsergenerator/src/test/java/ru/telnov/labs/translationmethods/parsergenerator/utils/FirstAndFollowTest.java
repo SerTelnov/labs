@@ -2,15 +2,14 @@ package ru.telnov.labs.translationmethods.parsergenerator.utils;
 
 import org.junit.Before;
 import org.junit.Test;
-import ru.telnov.labs.translationmethods.parsergenerator.tokens.LexerToken;
 import ru.telnov.labs.translationmethods.parsergenerator.tokens.NotTerminal;
 import ru.telnov.labs.translationmethods.parsergenerator.tokens.Rule;
 import ru.telnov.labs.translationmethods.parsergenerator.tokens.Terminal;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class FirstAndFollowTest {
 
