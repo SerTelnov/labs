@@ -27,8 +27,8 @@ opPlusMinus returns (String s)
     ;
 
 total returns (Integer outVal)
-    : mul
-        { outVal = mulNode.getValue();          }
+    : unOps
+        { outVal = unOpsNode.getValue();        }
       total1<outVal>
         { if (total1Node.getValue() != null)    }
         {   outVal = total1Node.getValue();     }
@@ -37,8 +37,8 @@ total returns (Integer outVal)
 total1 (Integer inVal) returns (Integer outVal)
     : opMulDiv
         { String op = opMulDivNode.getValue();          }
-      mul
-        { Integer v = mulNode.getValue();               }
+      unOps
+        { Integer v = unOpsNode.getValue();             }
         { if (op.equals("*")) outVal = inVal * v;       }
         { else if (op.equals("/")) outVal = inVal / v;  }
         { else outVal = inVal;                          }
@@ -53,14 +53,31 @@ opMulDiv returns (String s)
     | DIV   { s = "/";  }
     ;
 
-mul returns (Integer outVal)
-    : LPAREN expr RPAREN
-        { outVal = exprNode.getValue();                 }
-    | VALUE
-        { outVal = Integer.valueOf(getLastTerminal());  }
-    | opPlusMinus
-        { String unOp = opPlusMinusNode.getValue();       }
-      VALUE
-        { String v = getLastTerminal();                 }
-        { outVal = Integer.valueOf(unOp + v);           }
+unOps returns (Integer outVal)
+    : opPlusMinus
+        { String unOp = opPlusMinusNode.getValue();             }
+      term
+        { String v = getLastTerminal();                         }
+        { outVal = Integer.valueOf(unOp + v);                   }
+    | term
+        { outVal = termNode1.getValue();    }
+      fact<outVal>
+        { Integer factVal = factNode.getValue(); }
+        { if (factVal != null) outVal = factVal; }
+    ;
+
+fact (Integer inVal) returns (Integer outVal)
+    : FACTORIAL
+        { outVal = countFactorial(inVal);   }
+      fact<outVal>
+        { Integer factVal = factNode.getValue(); }
+        { if (factVal != null) outVal = factVal; }
+    |
+    ;
+
+term returns (Integer outVal)
+    : VALUE
+        { outVal = Integer.valueOf(getLastTerminal());          }
+    | LPAREN expr RPAREN
+        { outVal = exprNode.getValue();                         }
     ;

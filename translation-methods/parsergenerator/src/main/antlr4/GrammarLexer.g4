@@ -27,7 +27,7 @@ JAVA_CLASS_NAME:        [A-Z] [a-zA-Z0-9]*;
 // regex
 
 TOKEN_VALUE:            '\'' ~[\r\n]+ '\'';
-REGEX_VALUE:            ('[' ~[\r\n]+ ']' ('*'|'+'|'?')?)+;
+REGEX_VALUE:            ('[' ~[\r\n]+ ']' ('*'|'+'|'?'|'!')*)+;
 JCODE:                  '{' ~[\r\n]+ '}';
 IN_VALUE:               '<' ~[\r\n]+ '>';
 

@@ -4,10 +4,7 @@ import ru.telnov.labs.translationmethods.parsergenerator.generator.builders.*;
 import ru.telnov.labs.translationmethods.parsergenerator.tokens.*;
 import ru.telnov.labs.translationmethods.parsergenerator.utils.Constants;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.telnov.labs.translationmethods.parsergenerator.utils.Constants.TABS;
@@ -45,8 +42,20 @@ public final class ParserGenerator {
 
         clazz.addMethod(makeConsumeMethod());
         clazz.addMethod(makeTerminalGetter());
+        clazz.addMethod(countFactorialMethod());
 
         return clazz;
+    }
+
+    private static Method countFactorialMethod() {
+        Method method = new Method(Modifier.PRIVATE, "Integer", "countFactorial", new Arg("int", "value"));
+        method.addStatements("int result = value",
+                "if (result == 0) return 1",
+                "for (int i = value - 1; i > 0; i--) {\n" +
+                "           result *= i;\n" +
+                "        }",
+                "return result");
+        return method;
     }
 
     private static Method makeTerminalGetter() {
@@ -118,6 +127,7 @@ public final class ParserGenerator {
         switchBuilder.append("switch (curToken.getTypeToken()) {\n");
 
         boolean wasEpsilon = false;
+        Map<String, Integer> nameNotTerminalNode = new HashMap<>();
         for (Rule rule : notTerminal.getRules()) {
             LexerToken firstToken = rule.firstToken();
             Set<Terminal> curFirst;
@@ -144,11 +154,20 @@ public final class ParserGenerator {
                             methodName = token.getName();
                             if (token.getTokenType() == TokenType.ATTRIBUTE_NTERMINAL) {
                                 AttributeNotTerminal anTerminal = (AttributeNotTerminal) token;
+                                String nameNode = methodName + "Node";
+                                if (!nameNotTerminalNode.containsKey(nameNode)) {
+                                    nameNotTerminalNode.put(nameNode, 0);
+                                }
+                                int countName = nameNotTerminalNode.get(nameNode);
+                                nameNotTerminalNode.put(nameNode, countName + 1);
+                                if (countName > 0) {
+                                    nameNode += countName;
+                                }
                                 builder.append("ValueNode<")
                                         .append(anTerminal.getReturnType())
                                         .append("> ")
-                                        .append(methodName)
-                                        .append("Node = ")
+                                        .append(nameNode)
+                                        .append(" = ")
                                         .append("(ValueNode<")
                                         .append(anTerminal.getReturnType())
                                         .append(">) ")
@@ -167,8 +186,7 @@ public final class ParserGenerator {
                                         .append(");\n")
                                         .append(TABS[4])
                                         .append("curNode.addChild(")
-                                        .append(methodName)
-                                        .append("Node")
+                                        .append(nameNode)
                                         .append(");");
                             } else {
                                 if (token.isTerminal()) {

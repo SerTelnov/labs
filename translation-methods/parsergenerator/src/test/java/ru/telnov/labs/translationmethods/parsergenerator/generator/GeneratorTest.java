@@ -1,5 +1,6 @@
 package ru.telnov.labs.translationmethods.parsergenerator.generator;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import ru.telnov.labs.translationmethods.parsergenerator.TestUtils;
 import ru.telnov.labs.translationmethods.parsergenerator.generator.exception.GeneratorException;
@@ -16,7 +17,7 @@ public class GeneratorTest {
     private static TestUtils utils = new TestUtils();
     private static final String PACKAGE_NAME = "ru/telnov/labs/translationmethods/parsergenerator/generator/out/";
 
-//    @BeforeClass
+    @BeforeClass
     public static void initParser() throws IOException {
         Path path = utils.getPath("grammars");
 
